@@ -1,0 +1,152 @@
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.day-column {
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 10px;
+    background-color: #fafbfc;
+}
+
+.day-header {
+    text-align: center;
+    border-bottom: 2px solid #e1e4e8;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.time-slot {
+    border: 1px solid #d1d5da;
+    padding: 8px;
+    margin-bottom: 5px;
+    text-align: center;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    user-select: none;
+    transition: all 0.2s;
+    min-height: 24px;
+}
+
+.time-slot:hover:not(.booked) { 
+    background-color: #f3f4f6; 
+}
+
+.time-slot.selected {
+    background-color: #0366d6;
+    color: white;
+    border-color: #0366d6;
+}
+
+.time-slot.booked {
+    background-color: #ffeef0;
+    color: #cb2431;
+    border-color: #f1c0c0;
+    cursor: pointer;
+}
+
+.primary-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: bold;
+    display: block;
+    box-sizing: border-box;
+}
+
+.primary-btn:hover { background-color: #218838; }
+
+.secondary-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+}
+
+.secondary-btn:hover { background-color: #5a6268; }
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.active { display: flex; }
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.time-info {
+    background: #e6f7ff;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.form-group { margin-bottom: 15px; }
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 10px;
+}
