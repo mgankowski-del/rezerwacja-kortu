@@ -3,79 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rezerwacja Kortu Tenisowego</title>
-    <link rel="stylesheet" href="style.css?v=150">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#28a745">
-    <link rel="apple-touch-icon" href="icon.png">
+    <title>Rezerwacja Kortu - Triton Country</title>
+    <link rel="stylesheet" href="style.css?v=301">
 </head>
 <body>
     <div class="container">
-        <h1>Rezerwacja Kortu tenisowego mieszkańców Triton Country</h1>
-        <p>Wybierz wolny termin (maksymalnie 2 godziny, czyli 4 sloty ciągiem).</p>
-        
-        <div id="calendar" class="calendar-grid"></div>
+        <header style="text-align: center; margin-bottom: 20px;">
+            <h1>Rezerwacja Kortu</h1>
+            <p>Mieszkańcy Triton Country</p>
+        </header>
 
-        <button id="reserveBtn" class="primary-btn" style="display: none;">
-            Zarezerwuj wybrane terminy
-        </button>
+        <div id="calendar" class="calendar-grid">
+            </div>
+
+        <button id="reserveBtn" class="primary-btn" style="display: none;">Zarezerwuj wybrane terminy</button>
     </div>
 
     <div id="bookingModal" class="modal">
         <div class="modal-content">
-            <h2>Potwierdź rezerwację</h2>
-            <p id="selectedTimeInfo" class="time-info"></p>
-            
+            <h2>Dane rezerwacji</h2>
             <div class="form-group">
-                <label>Imię:</label>
-                <input type="text" id="inputFirstName" placeholder="np. Jan" required>
+                <label>Imię</label>
+                <input type="text" id="inputFirstName" placeholder="np. Zbyszek">
             </div>
             <div class="form-group">
-                <label>Ulica i numer domu:</label>
-                <input type="text" id="inputAddress" placeholder="np. Kwiatowa 15" required>
+                <label>Ulica i nr domu</label>
+                <input type="text" id="inputAddress" placeholder="np. Słowika 61">
             </div>
             <div class="form-group">
-                <label>PIN (do ewentualnej anulacji):</label>
-                <input type="text" id="inputPin" placeholder="np. 1234" maxlength="4" required>
-                <small style="display: block; margin-top: 5px; color: #666;">Zapisz ten PIN! Będzie potrzebny do odwołania rezerwacji.</small>
+                <label>PIN (4 cyfry do odwołania)</label>
+                <input type="number" id="inputPin">
             </div>
-            
             <div class="modal-actions">
                 <button id="cancelModalBtn" class="secondary-btn">Anuluj</button>
-                <button id="confirmBookingBtn" class="primary-btn">Potwierdzam</button>
+                <button id="confirmBookingBtn" class="primary-btn" style="width: auto; margin: 0;">Potwierdź</button>
             </div>
         </div>
     </div>
 
     <div id="successModal" class="modal">
         <div class="modal-content" style="text-align: center;">
-            <h2 style="color: #28a745; margin-top: 0;">Sukces!</h2>
-            <p>Kort został pomyślnie zarezerwowany.</p>
-            <p style="background: #e6f7ff; padding: 10px; border-radius: 5px; margin: 15px 0;">
-                Twój PIN do anulacji: <strong id="successPin" style="font-size: 1.2em; color: #0366d6;"></strong>
-            </p>
-            
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-                <a id="btnGoogleCalendar" href="#" target="_blank" class="primary-btn" style="text-decoration: none; background-color: #4285F4; text-align: center;">
-                    📅 Dodaj do Google Calendar
-                </a>
-                <a id="btnIcsCalendar" href="#" class="secondary-btn" style="text-decoration: none; background-color: #333; color: white; text-align: center;">
-                    🍏 Dodaj do Apple / Outlook (.ics)
-                </a>
-                <button id="closeSuccessBtn" class="secondary-btn" style="margin-top: 15px; background-color: #e1e4e8; color: #333;">
-                    Zamknij okienko
-                </button>
-            </div>
+            <h2>Zarezerwowano!</h2>
+            <p>Twój PIN to:</p>
+            <h1 id="successPin" style="color: #0366d6; margin: 15px 0;"></h1>
+            <button id="closeSuccessBtn" class="secondary-btn">Zamknij</button>
         </div>
     </div>
 
-    <script type="module" src="app.js?v=2"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-            .then(() => console.log("Service Worker zarejestrowany pomyślnie."))
-            .catch((error) => console.log("Błąd rejestracji Service Workera:", error));
-        }
-    </script>
+    <script type="module" src="app.js?v=301"></script>
 </body>
 </html>

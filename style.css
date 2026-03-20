@@ -1,245 +1,79 @@
-/* --- TRITON MODERN UI v2.2 - FINALNE SCALANIE --- */
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg-color: #f4f7f9;
+    --bg-color: #f8f9fc;
     --card-color: #ffffff;
-    --text-main: #2d3748;
-    --text-muted: #718096;
-    --accent-color: #bef227; /* Kolor piłki tenisowej */
-    --accent-hover: #a6d81f;
-    --accent-text: #1a202c;
-    --booked-bg: #fff5f5;
-    --booked-border: #fc8181;
-    --booked-text: #9b2c2c;
-    --border-color: #edf2f7;
+    --text-main: #1a2a47;
+    --accent-color: #bef227;
+    --booked-bg: #fff1f1;
+    --booked-text: #721c24;
+    --border-color: #e1e8f0;
     --font-family: 'Inter', sans-serif;
-    --radius-lg: 16px;
-    --radius-md: 12px;
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.05);
+    --radius: 12px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-main); padding: 20px 10px; line-height: 1.5; }
+.container { max-width: 1200px; margin: 0 auto; }
 
-body { 
-    font-family: var(--font-family); 
-    background-color: var(--bg-color); 
-    color: var(--text-main); 
-    line-height: 1.6; 
-    padding: 20px 10px 100px 10px; 
-}
-
-.container { max-width: 1400px; margin: 0 auto; }
-
-/* NAGŁÓWEK */
-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-h1 { 
-    font-weight: 800; 
-    font-size: 2.2rem; 
-    letter-spacing: -0.02em;
-    color: #1a202c;
-}
-
-/* SIATKA KALENDARZA */
 .calendar-grid { 
     display: flex; 
-    flex-wrap: nowrap; 
     overflow-x: auto; 
-    gap: 15px; 
-    padding: 10px 5px 30px 5px;
+    gap: 12px; 
+    padding-bottom: 20px; 
     -webkit-overflow-scrolling: touch;
 }
 
-/* KARTA DNIA */
 .day-column { 
-    flex: 0 0 210px; 
-    background-color: var(--card-color); 
-    border-radius: var(--radius-lg); 
-    box-shadow: var(--shadow-md); 
+    flex: 0 0 180px; 
+    background: var(--card-color); 
+    border-radius: var(--radius); 
     border: 1px solid var(--border-color); 
-    overflow: hidden;
+    overflow: hidden; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.day-header { 
-    background-color: #fff; 
-    padding: 15px 10px; 
-    text-align: center; 
-    border-bottom: 2px solid var(--bg-color);
-}
+.day-header { padding: 12px; text-align: center; border-bottom: 1px solid var(--border-color); background: #fff; }
+.day-header strong { background: var(--accent-color); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
 
-.day-header strong { 
-    color: var(--accent-text); 
-    background-color: var(--accent-color); 
-    padding: 3px 10px; 
-    border-radius: 20px; 
-    font-size: 0.75rem; 
-    text-transform: uppercase;
-    display: inline-block; 
-    margin-bottom: 5px; 
-}
-
-.day-header span {
-    display: block;
-    font-size: 1.1rem;
-    font-weight: 700;
-}
-
-/* SLOTY CZASOWE */
 .time-slot { 
-    padding: 12px 10px; 
+    padding: 10px; 
     text-align: center; 
-    border-bottom: 1px solid var(--border-color); 
+    border-bottom: 1px solid #f1f1f1; 
     cursor: pointer; 
-    transition: all 0.2s; 
-    font-size: 0.9rem; 
-    font-weight: 500;
-    color: var(--text-muted);
-    min-height: 48px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    font-size: 0.85rem; 
+    transition: background 0.2s;
 }
 
-.time-slot:last-child { border-bottom: none; }
-
-.time-slot:not(.booked):not(.selected):hover { 
-    background-color: #f1f9de; 
-}
-
-.time-slot.selected { 
-    background-color: var(--accent-color); 
-    color: var(--accent-text); 
-    font-weight: 700; 
-    border-color: transparent;
-}
-
-/* --- LOGIKA WIZUALNEGO ŁĄCZENIA --- */
+.time-slot.selected { background-color: var(--accent-color); font-weight: bold; }
 
 .time-slot.booked { 
     background-color: var(--booked-bg); 
     color: var(--booked-text); 
     text-align: left; 
-    padding-left: 14px;
-    border-bottom: none; /* Ukrywamy linię podziału wewnątrz bloku */
-    border-left: 5px solid var(--booked-border);
+    border-left: 3px solid #ff5f5f; 
     cursor: pointer;
+    font-size: 0.75rem;
 }
+.time-slot.booked strong { display: block; color: #000; }
 
-/* Zaokrąglamy tylko początek rezerwacji */
-.time-slot.booked:not(.is-continuation) {
-    border-top-left-radius: 4px;
-}
-
-/* Przywracamy linię podziału i zaokrąglenie tylko na końcu bloku */
-.time-slot.booked.block-end {
-    border-bottom: 1px solid var(--border-color);
-    border-bottom-left-radius: 4px;
-}
-
-.time-slot.booked strong { 
-    display: block; 
-    font-size: 0.85rem; 
-    color: #c53030;
-    margin-bottom: 1px;
-}
-
-.time-slot.booked span { 
-    display: block;
-    font-size: 0.85rem; 
-    font-weight: 600;
-    line-height: 1.2;
-}
-
-/* UKRYWANIE TEKSTU W KONTYNUACJI */
-.time-slot.booked.is-continuation strong,
-.time-slot.booked.is-continuation span {
-    display: none;
-}
-
-/* PŁYWAJĄCY PRZYCISK */
 .primary-btn { 
-    position: fixed;
-    bottom: 25px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    min-width: 220px;
-    padding: 16px 32px; 
-    background-color: #1a202c; 
-    color: white; 
-    border: none; 
-    border-radius: 50px; 
-    font-weight: 700; 
-    font-size: 1.1rem; 
-    cursor: pointer; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    transition: all 0.3s ease;
+    display: block; width: 100%; max-width: 300px; margin: 20px auto; 
+    padding: 12px; background: #1a2a47; color: #fff; border: none; 
+    border-radius: 25px; font-weight: 600; cursor: pointer; 
 }
 
-.primary-btn:hover { 
-    transform: translateX(-50%) translateY(-3px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+.modal { 
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; 
 }
-
-/* MODALE */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-}
-
 .modal.active { display: flex; }
+.modal-content { background: #fff; padding: 25px; border-radius: var(--radius); width: 90%; max-width: 400px; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; }
+.form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+.secondary-btn { padding: 10px 20px; background: #e1e4e8; border: none; border-radius: 6px; cursor: pointer; }
 
-.modal-content {
-    background: white;
-    padding: 35px;
-    border-radius: var(--radius-lg);
-    width: 90%;
-    max-width: 400px;
-}
-
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.9rem; }
-.form-group input { 
-    width: 100%; 
-    padding: 14px; 
-    border: 1px solid var(--border-color); 
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    background-color: #f8fafc;
-}
-
-/* PRZYCISKI W MODALU */
-.modal-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 10px;
-}
-
-.secondary-btn {
-    flex: 1;
-    padding: 14px;
-    background-color: #edf2f7;
-    color: #4a5568;
-    border: none;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-/* MOBILE */
 @media (max-width: 600px) {
-    h1 { font-size: 1.7rem; }
-    .day-column { flex: 0 0 185px; }
-    .primary-btn { width: 90%; }
+    .day-column { flex: 0 0 150px; }
 }
