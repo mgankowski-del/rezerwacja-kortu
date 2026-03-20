@@ -1,22 +1,18 @@
 /* --- TRITON MODERN THEME --- */
 
-/* Import nowoczesnej czcionki Inter z Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    /* Paleta Kolorów */
-    --bg-color: #f8f9fc;       /* Bardzo jasny szary - tło aplikacji */
-    --card-color: #ffffff;     /* Biały - tło elementów */
-    --text-main: #1a2a47;      /* Ciemny granat - główny tekst */
-    --text-muted: #6c757d;    /* Szary - mniej ważny tekst */
-    --accent-color: #bef227;   /* Neonowa zieleń (piłka) - akcenty */
-    --accent-hover: #a6d81f;   /* Ciemniejsza zieleń na hover */
-    --accent-text: #000000;    /* Czarny tekst na zielonym tle */
-    --booked-color: #ff5f5f;   /* Czerwony - zajęte terminy */
-    --border-color: #e1e8f0;   /* Jasny szary - ramki */
-    
-    /* Inne ustawienia */
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --bg-color: #f8f9fc;
+    --card-color: #ffffff;
+    --text-main: #1a2a47;
+    --text-muted: #6c757d;
+    --accent-color: #bef227;
+    --accent-hover: #a6d81f;
+    --accent-text: #000000;
+    --booked-color: #ff5f5f;
+    --border-color: #e1e8f0;
+    --font-family: 'Inter', sans-serif;
     --radius-md: 10px;
     --radius-sm: 6px;
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
@@ -24,355 +20,54 @@
     --transition: all 0.2s ease;
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-main); line-height: 1.5; padding: 20px 10px; }
+.container { max-width: 1200px; margin: 0 auto; }
+h1 { text-align: center; font-weight: 700; font-size: 2.2rem; margin-bottom: 5px; }
+.container > p { text-align: center; color: var(--text-muted); margin-bottom: 25px; font-size: 1rem; }
 
-body {
-    font-family: var(--font-family);
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    line-height: 1.5;
-    padding: 20px 10px;
-}
+/* KALENDARZ */
+.calendar-grid { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; scroll-snap-type: x mandatory; }
+.day-column { flex: 0 0 280px; background-color: var(--card-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); overflow: hidden; scroll-snap-align: start; }
+.day-header { background-color: #ffffff; padding: 15px; text-align: center; border-bottom: 1px solid var(--border-color); font-weight: 600; }
+.day-header strong { color: var(--accent-text); background-color: var(--accent-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem; margin-bottom: 4px; display: inline-block; }
+.time-slot { padding: 12px 15px; text-align: center; border-bottom: 1px solid #f1f1f1; cursor: pointer; transition: var(--transition); font-size: 0.95rem; user-select: none; }
+.time-slot:last-child { border-bottom: none; }
+.time-slot:not(.booked):not(.selected):hover { background-color: #f1f9de; color: var(--accent-text); }
+.time-slot.selected { background-color: var(--accent-color); color: #000; font-weight: 600; border-color: var(--accent-color); }
+.time-slot.booked { background-color: #fff1f1; border-left: 4px solid var(--booked-color); color: #721c24; cursor: not-allowed; text-align: left; }
+.time-slot.booked strong { color: var(--text-main); }
 
-/* Główny kontener */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
+/* PRZYCISKI */
+.primary-btn { display: block; width: 100%; max-width: 320px; margin: 25px auto; padding: 14px 20px; background-color: var(--accent-color); color: var(--accent-text); border: none; border-radius: 30px; font-family: var(--font-family); font-weight: 600; font-size: 1.05rem; cursor: pointer; transition: var(--transition); box-shadow: 0 4px 6px rgba(190, 242, 39, 0.2); }
+.primary-btn:hover { background-color: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(190, 242, 39, 0.3); }
+.secondary-btn { padding: 10px 18px; background-color: #e1e4e8; color: #333; border: none; border-radius: var(--radius-sm); font-family: var(--font-family); font-weight: 500; cursor: pointer; transition: var(--transition); }
+.secondary-btn:hover { background-color: #d1d5da; }
 
-/* Nagłówek strony */
-h1 {
-    text-align: center;
-    font-weight: 700;
-    font-size: 2.2rem;
-    color: var(--text-main);
-    margin-bottom: 5px;
-}
+/* MODAL */
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 15px; opacity: 0; transition: opacity 0.3s ease; }
+.modal.active { display: flex; opacity: 1; }
+.modal-content { background-color: var(--card-color); padding: 30px; border-radius: var(--radius-md); width: 100%; max-width: 480px; box-shadow: var(--shadow-md); transform: translateY(-20px); transition: transform 0.3s ease; }
+.modal.active .modal-content { transform: translateY(0); }
+.modal-content h2 { font-weight: 700; font-size: 1.6rem; margin-bottom: 5px; margin-top: 0; }
+.time-info { font-size: 0.9rem; background-color: #e6f7ff; color: #0366d6; padding: 10px; border-radius: var(--radius-sm); margin-bottom: 20px; font-weight: 500; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; }
+.form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-family); font-size: 1rem; transition: var(--transition); background-color: #fcfcfc; }
+.form-group input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(190, 242, 39, 0.15); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+.modal-actions .primary-btn { width: auto; margin: 0; max-width: none; padding: 10px 20px; border-radius: var(--radius-sm); }
 
-.container > p {
-    text-align: center;
-    color: var(--text-muted);
-    margin-bottom: 25px;
-    font-size: 1rem;
-}
+/* SUKCES & CALENDAR BTNS */
+#successPin { font-size: 1.4rem; color: #0366d6; }
+#btnGoogleCalendar, #btnIcsCalendar { display: block; padding: 12px; text-decoration: none !important; text-align: center; border-radius: var(--radius-sm); font-weight: 500; font-size: 0.95rem; transition: var(--transition); color: white !important; }
+#btnGoogleCalendar:hover, #btnIcsCalendar:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+#closeSuccessBtn { margin-top: 15px; background-color: #f1f3f5; color: #333; width: 100%; }
 
-/* --- KALENDARZ --- */
-
-.calendar-grid {
-    display: flex;
-    overflow-x: auto; /* Przewijanie poziome na małych ekranach */
-    gap: 15px;
-    padding-bottom: 15px; /* Odstęp na scrollbar */
-    scroll-snap-type: x mandatory; /* Ładne przyklejanie scrolla na iOS */
-}
-
-/* Kolumna Dnia */
-.day-column {
-    flex: 0 0 280px; /* Stała szerokość kolumny */
-    background-color: var(--card-color);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border-color);
-    overflow: hidden;
-    scroll-snap-align: start; /* Przyklejanie scrolla */
-}
-
-/* Nagłówek Dnia */
-.day-header {
-    background-color: #ffffff;
-    padding: 15px;
-    text-align: center;
-    border-bottom: 1px solid var(--border-color);
-    font-weight: 600;
-}
-
-.day-header strong {
-    color: var(--accent-text);
-    background-color: var(--accent-color);
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    margin-bottom: 4px;
-    display: inline-block;
-}
-
-.day-header br + span, 
-.day-header {
-    color: var(--text-main);
-}
-
-/* Kafelek Godziny (Sufrowy -> Nowoczesny) */
-.time-slot {
-    padding: 12px 15px;
-    text-align: center;
-    border-bottom: 1px solid #f1f1f1;
-    cursor: pointer;
-    transition: var(--transition);
-    font-size: 0.95rem;
-    color: var(--text-main);
-    user-select: none; /* Brak zaznaczania tekstu na telefonie */
-}
-
-.time-slot:last-child {
-    border-bottom: none;
-}
-
-/* Stan: Dostępny (Hover) */
-.time-slot:not(.booked):not(.selected):hover {
-    background-color: #f1f9de; /* Bardzo jasna zieleń */
-    color: var(--accent-text);
-}
-
-/* Stan: Zaznaczony (Selected) */
-.time-slot.selected {
-    background-color: #bef227; /* Nasz Accent Color */
-    color: #000;
-    font-weight: 600;
-    border-color: #bef227;
-}
-
-/* Stan: Zajęty (Booked) - Poprawka graficzna */
-.time-slot.booked {
-    background-color: #fff1f1; /* Bardzo jasny czerwony */
-    border-left: 4px solid var(--booked-color);
-    color: #721c24; /* Ciemny czerwony tekst */
-    cursor: not-allowed;
-    text-align: left; /* Lepiej czyta się imię przy lewej */
-}
-
-.time-slot.booked strong {
-    color: var(--text-main);
-}
-
-.time-slot.booked br + span {
-    color: #9c4c4c; /* Mniej ważny tekst rezerwacji */
-}
-
-/* --- PRZYCISKI --- */
-
-.primary-btn {
-    display: block;
-    width: 100%;
-    max-width: 320px;
-    margin: 25px auto;
-    padding: 14px 20px;
-    background-color: var(--accent-color);
-    color: var(--accent-text);
-    border: none;
-    border-radius: 30px; /* Zaokrąglony przycisk */
-    font-family: var(--font-family);
-    font-weight: 600;
-    font-size: 1.05rem;
-    cursor: pointer;
-    transition: var(--transition);
-    box-shadow: 0 4px 6px rgba(190, 242, 39, 0.2);
-}
-
-.primary-btn:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-2px); /* Delikatne uniesienie */
-    box-shadow: 0 6px 12px rgba(190, 242, 39, 0.3);
-}
-
-.primary-btn:active {
-    transform: translateY(0px);
-}
-
-.secondary-btn {
-    padding: 10px 18px;
-    background-color: #e1e4e8;
-    color: #333;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-family);
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.secondary-btn:hover {
-    background-color: #d1d5da;
-}
-
-/* --- OKNA MODALNE (NOWOCZESNE KARTY) --- */
-
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Ciemniejsze tło */
-    backdrop-filter: blur(4px); /* Rozmycie tła */
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.modal.active {
-    display: flex;
-    opacity: 1;
-}
-
-.modal-content {
-    background-color: var(--card-color);
-    padding: 30px;
-    border-radius: var(--radius-md);
-    width: 100%;
-    max-width: 480px;
-    box-shadow: var(--shadow-md);
-    transform: translateY(-20px);
-    transition: transform 0.3s ease;
-}
-
-.modal.active .modal-content {
-    transform: translateY(0);
-}
-
-.modal-content h2 {
-    font-weight: 700;
-    font-size: 1.6rem;
-    color: var(--text-main);
-    margin-bottom: 5px;
-    margin-top: 0;
-}
-
-.time-info {
-    font-size: 0.9rem;
-    background-color: #e6f7ff;
-    color: #0366d6;
-    padding: 10px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 20px;
-    font-weight: 500;
-}
-
-/* Formularz w Modalu */
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    font-weight: 500;
-    font-size: 0.9rem;
-    margin-bottom: 6px;
-    color: var(--text-main);
-}
-
-.form-group input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-family);
-    font-size: 1rem;
-    transition: var(--transition);
-    background-color: #fcfcfc;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(190, 242, 39, 0.15);
-}
-
-.form-group small {
-    display: block;
-    margin-top: 5px;
-    color: var(--text-muted);
-    font-size: 0.8rem;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 25px;
-}
-
-.modal-actions .primary-btn {
-    width: auto;
-    margin: 0;
-    max-width: none;
-    padding: 10px 20px;
-    border-radius: var(--radius-sm);
-}
-
-/* Modal Sukcesu - Specjalne Style */
-#successModal .modal-content p {
-    margin: 10px 0;
-    color: var(--text-muted);
-}
-
-#successPin {
-    font-size: 1.4rem;
-    color: #0366d6;
-}
-
-/* Kalendarz Google / Apple - Stylistyka przycisków */
-#btnGoogleCalendar,
-#btnIcsCalendar {
-    display: block;
-    padding: 12px;
-    text-decoration: none !important;
-    text-align: center;
-    border-radius: var(--radius-sm);
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: var(--transition);
-    color: white !important;
-}
-
-#btnGoogleCalendar:hover,
-#btnIcsCalendar:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-#closeSuccessBtn {
-    margin-top: 15px;
-    background-color: #f1f3f5;
-    color: #333;
-    width: 100%;
-}
-
-/* --- RESPONSYWNOŚĆ (MOBILE FIRST) --- */
-
+/* MOBILE */
 @media (max-width: 600px) {
-    h1 {
-        font-size: 1.8rem;
-    }
-    
-    body {
-        padding: 15px 5px;
-    }
-    
-    .calendar-grid {
-        gap: 10px;
-    }
-    
-    .day-column {
-        flex: 0 0 85%; /* Na mobile columns są prawie pełnoekranowe */
-    }
-    
-    .modal-content {
-        padding: 20px;
-    }
-    
-    .modal-actions {
-        flex-direction: column-reverse; /* Przycisk anuluj na dole */
-    }
-    
-    .modal-actions button {
-        width: 100%;
-    }
+    h1 { font-size: 1.8rem; }
+    .day-column { flex: 0 0 85%; }
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-actions button { width: 100%; }
 }
