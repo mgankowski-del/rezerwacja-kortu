@@ -177,10 +177,11 @@ async function loadReservationsFromDB() {
                         slotEl.dataset.reservationId = reservationId; 
                         
                         const timeText = timeStr.split('T')[1];
+                        // Zachowujemy wsparcie dla starszych rezerwacji, które miały zapisane nazwisko
                         const displayName = data.firstName ? data.firstName : (data.surname || 'Rezerwacja'); 
                         
                         slotEl.innerHTML = `<strong>${timeText}</strong><br><span style="font-size: 11px; line-height: 1.2; display: inline-block; margin-top: 4px;">${displayName}, ${data.address || ''}</span>`;
-                        slotEl.title = `Zajęte przez: ${data.firstName || ''} ${data.surname || ''}`;
+                        slotEl.title = `Zajęte przez: ${displayName}`;
                     }
                 });
             }
@@ -239,14 +240,12 @@ function setupEventListeners() {
     confirmBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         
-        const firstNameEl = document.getElementById('inputFirstName');
-        const firstName = firstNameEl ? firstNameEl.value.trim() : '';
-        const surname = document.getElementById('inputSurname').value.trim();
+        const firstName = document.getElementById('inputFirstName').value.trim();
         const address = document.getElementById('inputAddress').value.trim();
         const pin = document.getElementById('inputPin').value.trim();
 
-        if (!surname || !address || !pin) {
-            alert("Proszę wypełnić wymagane pola (Nazwisko, Adres, PIN)!");
+        if (!firstName || !address || !pin) {
+            alert("Proszę wypełnić wymagane pola (Imię, Adres, PIN)!");
             return;
         }
 
@@ -258,7 +257,6 @@ function setupEventListeners() {
         try {
             const docRef = await addDoc(collection(db, "reservations"), {
                 firstName: firstName,
-                surname: surname,
                 address: address,
                 pin: pin,
                 bookedTimes: bookedTimes,
@@ -277,9 +275,8 @@ function setupEventListeners() {
                 s.element.dataset.reservationId = docRef.id; 
                 
                 const timeText = s.element.dataset.datetime.split('T')[1];
-                const displayName = firstName ? firstName : surname;
-                s.element.innerHTML = `<strong>${timeText}</strong><br><span style="font-size: 11px; line-height: 1.2; display: inline-block; margin-top: 4px;">${displayName}, ${address}</span>`;
-                s.element.title = `Zajęte przez: ${firstName} ${surname}`;
+                s.element.innerHTML = `<strong>${timeText}</strong><br><span style="font-size: 11px; line-height: 1.2; display: inline-block; margin-top: 4px;">${firstName}, ${address}</span>`;
+                s.element.title = `Zajęte przez: ${firstName}`;
             });
             
             document.getElementById('successPin').innerText = pin;
@@ -294,8 +291,7 @@ function setupEventListeners() {
             
             selectedSlots = [];
             document.getElementById('reserveBtn').style.display = 'none';
-            if(firstNameEl) firstNameEl.value = '';
-            document.getElementById('inputSurname').value = '';
+            document.getElementById('inputFirstName').value = '';
             document.getElementById('inputAddress').value = '';
             document.getElementById('inputPin').value = '';
 
