@@ -116,6 +116,7 @@ async function confirmBooking() {
     const pin = document.getElementById("inputPin").value;
     if (!fName || !addr || pin.length < 4) return alert("Wypełnij dane!");
 
+    localStorage.setItem('userPin', pin);
     generateCalendarLinks([...selectedSlots]);
 
     for (let s of selectedSlots) await addDoc(reservationsCol, { ...s, firstName: fName, address: addr, pin: pin });
@@ -126,11 +127,29 @@ async function confirmBooking() {
 }
 
 async function cancelReservation(res) {
-    const pin = prompt(`Podaj PIN dla rezerwacji ${res.firstName}:`);
-    if (pin === res.pin || pin === "9988") {
+    let savedPin = localStorage.getItem('userPin');
+    let shouldDelete = false;
+
+    // SCENARIUSZ 1: Telefon pamięta Twój PIN
+    if (savedPin === res.pin || savedPin === "9988") {
+        if (confirm(`Czy na pewno chcesz usunąć swoją rezerwację (${res.firstName})?`)) {
+            shouldDelete = true;
+        }
+    } 
+    // SCENARIUSZ 2: To nie Twoja rezerwacja lub telefon nie pamięta PIN-u
+    else {
+        let inputPin = prompt(`Podaj PIN dla rezerwacji ${res.firstName}:`);
+        if (inputPin === res.pin || inputPin === "9988") {
+            shouldDelete = true;
+        } else if (inputPin !== null) {
+            alert("Błędny PIN!");
+        }
+    }
+
+    if (shouldDelete) {
         const toDel = allReservations.filter(r => (r.date === res.date && r.firstName === res.firstName) || (res.bookedTimes && r.id === res.id));
         for (let item of toDel) await deleteDoc(doc(db, "reservations", item.id));
-    } else if (pin !== null) alert("Błędny PIN!");
+    }
 }
 
 onSnapshot(reservationsCol, (snap) => {

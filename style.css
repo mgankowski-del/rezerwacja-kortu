@@ -1,28 +1,38 @@
+/* --- TRITON MODERN UI v11.0 - FINAL MODAL FIX --- */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
     --bg-color: #f0f2f5;
     --card-color: #ffffff;
     --text-main: #1a2a47;
-    --accent-color: #bef227;
+    --text-muted: #64748b;
+    --accent-color: #bef227; 
     --booked-bg: #fff5f5;
     --booked-border: #fc8181;
     --booked-text: #9b2c2c;
     --border-color: #e2e8f0;
     --radius: 16px;
+    --primary-blue: #1a2a47;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding: 20px 0 100px 0; line-height: 1.5; }
 
-.container { width: 100%; max-width: 1400px; margin: 0 auto; }
+body { 
+    font-family: 'Inter', sans-serif; 
+    background-color: var(--bg-color); 
+    color: var(--text-main); 
+    padding: 20px 0 120px 0; 
+}
 
+/* SIATKA KALENDARZA */
 .calendar-grid { 
     display: flex; 
-    overflow-x: auto; 
     gap: 15px; 
+    overflow-x: auto; 
     padding: 20px 40px; 
     -webkit-overflow-scrolling: touch;
+    width: 100%;
     justify-content: flex-start;
 }
 
@@ -43,19 +53,20 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); colo
 .day-header strong { background: var(--accent-color); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; text-transform: uppercase; }
 .day-header span { display: block; font-size: 1.2rem; font-weight: 800; margin-top: 4px; }
 
+/* SLOTY CZASOWE */
 .time-slot { 
-    min-height: 45px; 
-    padding: 5px;
-    text-align: center; 
-    border-bottom: 1px solid #f1f5f9; 
-    cursor: pointer; 
-    font-size: 0.85rem; 
-    color: #64748b;
+    min-height: 48px; 
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.85rem; 
+    color: #64748b;
+    border-bottom: 1px solid #f1f5f9; 
+    cursor: pointer; 
+    transition: all 0.2s;
 }
 
+.time-slot:hover { background-color: #f1f9de; }
 .time-slot.selected { background-color: var(--accent-color); color: #000; font-weight: bold; }
 
 .time-slot.booked { 
@@ -65,7 +76,7 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); colo
     border-left: 4px solid var(--booked-border); 
     border-bottom: none;
     justify-content: flex-start;
-    padding: 6px 10px;
+    padding: 6px 12px;
     height: auto;
 }
 
@@ -76,17 +87,62 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); colo
 .time-slot.booked.is-continuation { min-height: 15px; height: 15px; padding: 0; }
 .time-slot.booked.is-continuation * { display: none; }
 
+/* PRZYCISK GŁÓWNY NA DOLE */
 .primary-btn { 
     position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-    width: 90%; max-width: 300px; padding: 15px; background: #1a2a47; color: #fff; 
-    border: none; border-radius: 30px; font-weight: 700; cursor: pointer; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 90%; max-width: 320px; padding: 16px; background: var(--primary-blue); color: #fff; 
+    border: none; border-radius: 40px; font-weight: 700; cursor: pointer; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 1000;
+    transition: transform 0.2s, background 0.2s;
 }
 
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 2000; }
+.primary-btn:hover { background: #000; transform: translateX(-50%) translateY(-2px); }
+
+/* --- STYLE MODALA (OKNA REZERWACJI) --- */
+.modal { 
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); 
+    align-items: center; justify-content: center; z-index: 2000; padding: 20px; 
+}
 .modal.active { display: flex; }
-.modal-content { background: #fff; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; }
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; font-weight: 600; margin-bottom: 5px; }
-.form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; }
-.secondary-btn { padding: 10px 20px; background: #e1e4e8; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+
+.modal-content { 
+    background: #fff; padding: 35px; border-radius: 24px; 
+    width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+}
+
+.modal-content h2 { margin-bottom: 20px; font-size: 1.5rem; font-weight: 800; color: var(--primary-blue); }
+
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.9rem; color: var(--primary-blue); }
+.form-group input { 
+    width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; 
+    font-size: 1rem; background: #f8fafc; transition: border-color 0.2s;
+}
+.form-group input:focus { outline: none; border-color: var(--primary-blue); }
+
+/* AKCJE W OKNIE */
+.modal-actions { display: flex; gap: 12px; margin-top: 25px; }
+
+.secondary-btn {
+    flex: 1; padding: 14px; background: #f1f5f9; color: #475569; 
+    border: none; border-radius: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+}
+.secondary-btn:hover { background: #e2e8f0; }
+
+.confirm-btn {
+    flex: 1; padding: 14px; background: var(--primary-blue); color: #fff; 
+    border: none; border-radius: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s;
+}
+.confirm-btn:hover { background: #000; }
+
+/* KALENDARZ LINKI */
+.calendar-link-btn {
+    display: block; text-decoration: none; color: white; padding: 12px; 
+    border-radius: 10px; font-size: 0.95rem; font-weight: 700; border: none; cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .calendar-grid { padding: 10px 20px; }
+    .day-column { flex: 0 0 160px; }
+}
