@@ -59,29 +59,40 @@ function renderCalendar() {
         const dateStr = day.toISOString().split('T')[0];
         const dayCol = document.createElement("div");
         dayCol.className = "day-column";
-
-        const dayName = day.toLocaleDateString('pl-PL', { weekday: 'short' });
-        const dayDate = day.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' });
-
-        dayCol.innerHTML = `
-            <div class="day-header">
-                <strong>${dayName}</strong><br>
-                <span>${dayDate}</span>
-            </div>
-        `;
+        dayCol.innerHTML = `<div class="day-header">
+            <strong>${day.toLocaleDateString('pl-PL', { weekday: 'short' })}</strong><br>
+            <span>${day.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' })}</span>
+        </div>`;
 
         for (let hour = START_HOUR; hour < END_HOUR; hour++) {
-            for (let min of [0, 30]) {
-                const timeStr = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+            for (let min of ["00", "30"]) {
+                const timeStr = `${hour.toString().padStart(2, '0')}:${min}`;
+                const fullIsoMatch = `${dateStr}T${timeStr}`; // Format ze screena: 2026-03-24T17:30
+                
                 const slotDiv = document.createElement("div");
                 slotDiv.className = "time-slot";
 
-                const res = allReservations.find(r => r.date === dateStr && r.time === timeStr);
+                // SZUKANIE REZERWACJI (Obsługa starego i nowego formatu)
+                const res = allReservations.find(r => {
+                    // Nowy format
+                    if (r.date === dateStr && r.time === timeStr) return true;
+                    // Stary format (tablica bookedTimes)
+                    if (r.bookedTimes && r.bookedTimes.includes(fullIsoMatch)) return true;
+                    return false;
+                });
 
                 if (res) {
                     slotDiv.classList.add("booked");
-                    const range = getReservationRange(res, allReservations);
-                    slotDiv.innerHTML = `<strong>${range}</strong><span>${res.firstName}, ${res.address}</span>`;
+                    // Wyświetlamy imię i nazwisko (stare rezerwacje mają surname)
+                    const displayName = res.surname ? `${res.firstName} ${res.surname}` : res.firstName;
+                    
+                    // Dla starych rezerwacji pokazujemy tylko godzinę slotu, dla nowych zakres
+                    let displayTime = timeStr;
+                    if (r.date && r.time) {
+                         displayTime = getReservationRange(res, allReservations);
+                    }
+
+                    slotDiv.innerHTML = `<strong>${displayTime}</strong><span>${displayName}, ${res.address}</span>`;
                     slotDiv.onclick = () => cancelReservation(res);
                 } else {
                     slotDiv.innerText = timeStr;
