@@ -14,7 +14,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const START_HOUR = 6;
-const END_HOUR = 23;
+const END_HOUR = 22;
 const SLOT_DURATION_MINUTES = 30;
 const STORAGE_KEY = 'tennis_reservations';
 let selectedSlots = [];
