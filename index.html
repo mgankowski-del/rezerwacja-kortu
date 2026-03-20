@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rezerwacja Kortu - Triton Country</title>
-    <link rel="stylesheet" href="style.css?v=301">
+    <link rel="stylesheet" href="style.css?v=801">
 </head>
 <body>
     <div class="container">
@@ -13,8 +13,7 @@
             <p>Mieszkańcy Triton Country</p>
         </header>
 
-        <div id="calendar" class="calendar-grid">
-            </div>
+        <div id="calendar" class="calendar-grid"></div>
 
         <button id="reserveBtn" class="primary-btn" style="display: none;">Zarezerwuj wybrane terminy</button>
     </div>
@@ -24,14 +23,14 @@
             <h2>Dane rezerwacji</h2>
             <div class="form-group">
                 <label>Imię</label>
-                <input type="text" id="inputFirstName" placeholder="np. Zbyszek">
+                <input type="text" id="inputFirstName" placeholder="np. Michał">
             </div>
             <div class="form-group">
                 <label>Ulica i nr domu</label>
-                <input type="text" id="inputAddress" placeholder="np. Słowika 61">
+                <input type="text" id="inputAddress" placeholder="np. Słowika 24">
             </div>
             <div class="form-group">
-                <label>PIN (4 cyfry do odwołania)</label>
+                <label>PIN (4 cyfry)</label>
                 <input type="number" id="inputPin">
             </div>
             <div class="modal-actions">
@@ -43,13 +42,22 @@
 
     <div id="successModal" class="modal">
         <div class="modal-content" style="text-align: center;">
-            <h2>Zarezerwowano!</h2>
-            <p>Twój PIN to:</p>
-            <h1 id="successPin" style="color: #0366d6; margin: 15px 0;"></h1>
-            <button id="closeSuccessBtn" class="secondary-btn">Zamknij</button>
+            <h2 style="color: #059669;">Zarezerwowano!</h2>
+            <p>Twój PIN do odwołania:</p>
+            <h1 id="successPin" style="color: #0366d6; margin: 15px 0; font-size: 2.5rem;"></h1>
+            
+            <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
+                <p style="font-size: 0.85rem; margin-bottom: 10px; font-weight: 600;">Dodaj rezerwację do kalendarza:</p>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <a id="googleCalBtn" target="_blank" class="calendar-link-btn" style="background: #4285F4; color: white; text-decoration: none; padding: 10px; border-radius: 6px; font-size: 0.9rem; font-weight: 600;">Google Calendar</a>
+                    <button id="icsCalBtn" class="calendar-link-btn" style="background: #34a853; color: white; padding: 10px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; border: none; cursor: pointer;">Apple / iOS / Outlook</button>
+                </div>
+            </div>
+
+            <button id="closeSuccessBtn" class="secondary-btn" style="width: 100%; margin-top: 20px;">Zamknij</button>
         </div>
     </div>
 
-    <script type="module" src="app.js?v=301"></script>
+    <script type="module" src="app.js?v=801"></script>
 </body>
 </html>
