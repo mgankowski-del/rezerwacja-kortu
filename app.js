@@ -17,44 +17,80 @@ const reservationsCol = collection(db, "reservations");
 let allReservations = [];
 let selectedSlots = [];
 
+// POMOCNICZE
 function getPrevTime(time) {
     let [h, m] = time.split(':').map(Number);
     if (m === 30) m = 0; else { h -= 1; m = 30; }
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 }
 
+function getNextTime(time) {
+    let [h, m] = time.split(':').map(Number);
+    if (m === 0) m = 30; else { h += 1; m = 0; }
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+}
+
+function findReservationAt(date, time, list) {
+    const fullIso = `${date}T${time}`;
+    return list.find(r => 
+        (r.date === date && r.time === time) || 
+        (r.bookedTimes && r.bookedTimes.includes(fullIso))
+    );
+}
+
+// Znajduje ciągły blok rezerwacji
+function findConnectedBlock(targetTime, targetDate, targetName, reservationsList) {
+    const dayRes = reservationsList.filter(r => {
+        const isSameUser = r.firstName === targetName;
+        const isSameDate = r.date === targetDate || (r.bookedTimes && r.bookedTimes.some(t => t.startsWith(targetDate)));
+        return isSameUser && isSameDate;
+    });
+
+    let block = [];
+    const startRes = findReservationAt(targetDate, targetTime, dayRes);
+    if (!startRes) return [];
+
+    block.push(startRes);
+    let foundNew = true;
+    while (foundNew) {
+        foundNew = false;
+        for (let r of dayRes) {
+            if (block.includes(r)) continue;
+            const isNeighbor = block.some(b => {
+                // Dla starych rezerwacji z tablicą bookedTimes sprawdzamy sąsiedztwo z dowolnym elementem tablicy
+                if (r.bookedTimes) {
+                    return r.bookedTimes.some(t => {
+                        const [d, time] = t.split('T');
+                        return getNextTime(b.time) === time || getPrevTime(b.time) === time;
+                    });
+                }
+                return getNextTime(b.time) === r.time || getPrevTime(b.time) === r.time;
+            });
+            if (isNeighbor) {
+                block.push(r);
+                foundNew = true;
+            }
+        }
+    }
+    return block;
+}
+
 function getReservationRange(res, allRes, dateStr) {
-    try {
-        const dayRes = allRes.filter(r => (r.date === dateStr || (r.bookedTimes && r.bookedTimes.some(t => t.startsWith(dateStr)))) && r.firstName === res.firstName);
-        let times = res.bookedTimes ? res.bookedTimes.map(t => t.split('T')[1]) : dayRes.map(r => r.time);
-        times.sort();
+    if (res.bookedTimes) {
+        const times = res.bookedTimes.map(t => t.split('T')[1]).sort();
         const start = times[0];
         const last = times[times.length - 1];
         let [h, m] = last.split(':').map(Number);
         m += 30; if (m === 60) { h += 1; m = 0; }
         return `${start}-${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-    } catch (e) { return res.time || ""; }
-}
-
-function generateCalendarLinks(slots) {
-    if (slots.length === 0) return;
-    slots.sort((a, b) => a.time.localeCompare(b.time));
-    const date = slots[0].date.replace(/-/g, '');
-    const startTime = slots[0].time.replace(':', '') + '00';
-    let [h, m] = slots[slots.length - 1].time.split(':').map(Number);
+    }
+    const block = findConnectedBlock(res.time, dateStr, res.firstName, allRes);
+    block.sort((a, b) => a.time.localeCompare(b.time));
+    const start = block[0].time;
+    const last = block[block.length - 1].time;
+    let [h, m] = last.split(':').map(Number);
     m += 30; if (m === 60) { h += 1; m = 0; }
-    const endTime = `${h.toString().padStart(2, '0')}${m.toString().padStart(2, '0')}00`;
-    const title = encodeURIComponent("Kort Tenisowy");
-    const dates = `${date}T${startTime}/${date}T${endTime}`;
-
-    document.getElementById("googleCalBtn").href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}`;
-    document.getElementById("icsCalBtn").onclick = () => {
-        const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${date}T${startTime}\nDTEND:${date}T${endTime}\nSUMMARY:Kort Tenisowy\nEND:VEVENT\nEND:VCALENDAR`;
-        const blob = new Blob([ics], { type: 'text/calendar' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'rezerwacja.ics'; a.click();
-    };
+    return `${start}-${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 }
 
 function renderCalendar() {
@@ -72,24 +108,23 @@ function renderCalendar() {
         for (let hour = 6; hour < 23; hour++) {
             for (let min of ["00", "30"]) {
                 const timeStr = `${hour.toString().padStart(2, '0')}:${min}`;
-                const fullIso = `${dateStr}T${timeStr}`;
                 const slotDiv = document.createElement("div");
                 slotDiv.className = "time-slot";
 
-                const res = allReservations.find(r => (r.date === dateStr && r.time === timeStr) || (r.bookedTimes && r.bookedTimes.includes(fullIso)));
+                const res = findReservationAt(dateStr, timeStr, allReservations);
 
                 if (res) {
                     slotDiv.classList.add("booked");
                     const prevT = getPrevTime(timeStr);
-                    const prevFullIso = `${dateStr}T${prevT}`;
-                    const isCont = allReservations.some(r => (r.date === dateStr && r.time === prevT && r.firstName === res.firstName) || (r.bookedTimes && r.bookedTimes.includes(prevFullIso) && r.firstName === res.firstName));
+                    const prevRes = findReservationAt(dateStr, prevT, allReservations);
+                    const isCont = prevRes && prevRes.firstName === res.firstName;
                     
                     if (isCont) slotDiv.classList.add("is-continuation");
                     else {
                         const range = getReservationRange(res, allReservations, dateStr);
                         slotDiv.innerHTML = `<div class="res-content"><div class="res-time">${range}</div><div class="res-user">${res.firstName}, ${res.address}</div></div>`;
                     }
-                    slotDiv.onclick = () => cancelReservation(res);
+                    slotDiv.onclick = () => cancelReservation(res, dateStr, timeStr);
                 } else {
                     slotDiv.innerText = timeStr;
                     if (selectedSlots.some(s => s.date === dateStr && s.time === timeStr)) slotDiv.classList.add("selected");
@@ -104,51 +139,58 @@ function renderCalendar() {
 
 function toggleSelectSlot(date, time) {
     const idx = selectedSlots.findIndex(s => s.date === date && s.time === time);
-    if (idx > -1) selectedSlots.splice(idx, 1);
-    else { if (selectedSlots.length >= 4) return alert("Max 2h!"); selectedSlots.push({ date, time }); }
+    if (idx > -1) {
+        selectedSlots.splice(idx, 1);
+    } else {
+        // Robimy "wirtualne" sprawdzenie przed dodaniem, czy nie tworzymy bloku > 2h
+        const fName = document.getElementById("inputFirstName").value.trim() || "Użytkownik";
+        const virtualAll = [...allReservations, ...selectedSlots.map(s => ({...s, firstName: fName})), {date, time, firstName: fName}];
+        
+        const block = findConnectedBlock(time, date, fName, virtualAll);
+        if (block.length > 4) {
+            return alert("Pojedynczy blok rezerwacji bez przerwy nie może przekraczać 2 godzin!");
+        }
+        
+        selectedSlots.push({ date, time });
+    }
     document.getElementById("reserveBtn").style.display = selectedSlots.length > 0 ? "block" : "none";
     renderCalendar();
 }
 
 async function confirmBooking() {
-    const fName = document.getElementById("inputFirstName").value;
-    const addr = document.getElementById("inputAddress").value;
+    const fName = document.getElementById("inputFirstName").value.trim();
+    const addr = document.getElementById("inputAddress").value.trim();
     const pin = document.getElementById("inputPin").value;
-    if (!fName || !addr || pin.length < 4) return alert("Wypełnij dane!");
+    
+    if (!fName || !addr || pin.length < 4) return alert("Wypełnij wszystkie dane!");
 
     localStorage.setItem('userPin', pin);
-    generateCalendarLinks([...selectedSlots]);
-
-    for (let s of selectedSlots) await addDoc(reservationsCol, { ...s, firstName: fName, address: addr, pin: pin });
+    
+    for (let s of selectedSlots) {
+        await addDoc(reservationsCol, { ...s, firstName: fName, address: addr, pin: pin });
+    }
+    
     selectedSlots = [];
     document.getElementById("bookingModal").classList.remove("active");
     document.getElementById("successPin").innerText = pin;
     document.getElementById("successModal").classList.add("active");
 }
 
-async function cancelReservation(res) {
+async function cancelReservation(res, date, time) {
     let savedPin = localStorage.getItem('userPin');
     let shouldDelete = false;
 
-    // SCENARIUSZ 1: Telefon pamięta Twój PIN
     if (savedPin === res.pin || savedPin === "9988") {
-        if (confirm(`Czy na pewno chcesz usunąć swoją rezerwację (${res.firstName})?`)) {
-            shouldDelete = true;
-        }
-    } 
-    // SCENARIUSZ 2: To nie Twoja rezerwacja lub telefon nie pamięta PIN-u
-    else {
-        let inputPin = prompt(`Podaj PIN dla rezerwacji ${res.firstName}:`);
-        if (inputPin === res.pin || inputPin === "9988") {
-            shouldDelete = true;
-        } else if (inputPin !== null) {
-            alert("Błędny PIN!");
-        }
+        if (confirm(`Czy usunąć rezerwację ${getReservationRange(res, allReservations, date)}?`)) shouldDelete = true;
+    } else {
+        let inputPin = prompt(`Podaj PIN dla ${res.firstName}:`);
+        if (inputPin === res.pin || inputPin === "9988") shouldDelete = true;
+        else if (inputPin !== null) alert("Błędny PIN!");
     }
 
     if (shouldDelete) {
-        const toDel = allReservations.filter(r => (r.date === res.date && r.firstName === res.firstName) || (res.bookedTimes && r.id === res.id));
-        for (let item of toDel) await deleteDoc(doc(db, "reservations", item.id));
+        const blockToDel = findConnectedBlock(time, date, res.firstName, allReservations);
+        for (let item of blockToDel) await deleteDoc(doc(db, "reservations", item.id));
     }
 }
 
