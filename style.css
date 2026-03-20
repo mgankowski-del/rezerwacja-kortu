@@ -22,24 +22,24 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-main); line-height: 1.5; padding: 20px 10px; }
-.container { max-width: 1200px; margin: 0 auto; }
+.container { max-width: 100%; /* Pozwalamy kontenerowi być szerokim */ margin: 0 auto; padding: 0 10px; }
 h1 { text-align: center; font-weight: 700; font-size: 2.2rem; margin-bottom: 5px; }
 .container > p { text-align: center; color: var(--text-muted); margin-bottom: 25px; font-size: 1rem; }
 
-/* KALENDARZ - POWRÓT DO SCROLLA POZIOMEGO */
+/* KALENDARZ - TWARDY SCROLL POZIOMY DLA WSZYSTKICH */
 .calendar-grid { 
     display: flex; 
-    flex-wrap: nowrap; /* Wymuszamy jeden rząd */
-    overflow-x: auto; /* Włączamy przesuwanie lewo-prawo */
-    gap: 12px; 
-    padding-bottom: 20px; 
-    -webkit-overflow-scrolling: touch; /* Płynny scroll na iPhone */
-    scroll-snap-type: x proximity; /* Lekkie "przyciąganie" do kolumn */
+    flex-wrap: nowrap; /* Absolutny zakaz zawijania */
+    overflow-x: auto;  /* Włączamy scroll */
+    gap: 15px; 
+    padding: 10px 5px 30px 5px; /* Odstęp na dole dla estetyki scrollbara */
+    -webkit-overflow-scrolling: touch; 
+    scroll-snap-type: x proximity;
 }
 
-/* Kolumna Dnia - zwężona o ok. 40% (z 280px na ok. 170px) */
+/* Kolumna Dnia - Szerokość ok. 210px (komputer) */
 .day-column { 
-    flex: 0 0 175px; 
+    flex: 0 0 210px; /* Nie pozwalamy kolumnom się kurczyć ani rozciągać */
     background-color: var(--card-color); 
     border-radius: var(--radius-md); 
     box-shadow: var(--shadow-sm); 
@@ -48,51 +48,54 @@ h1 { text-align: center; font-weight: 700; font-size: 2.2rem; margin-bottom: 5px
     scroll-snap-align: start;
 }
 
-.day-header { background-color: #ffffff; padding: 12px 5px; text-align: center; border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 0.9rem; }
-.day-header strong { color: var(--accent-text); background-color: var(--accent-color); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 4px; display: inline-block; }
+.day-header { background-color: #ffffff; padding: 15px 5px; text-align: center; border-bottom: 1px solid var(--border-color); font-weight: 600; }
+.day-header strong { color: var(--accent-text); background-color: var(--accent-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem; margin-bottom: 4px; display: inline-block; }
 
-.time-slot { padding: 10px 5px; text-align: center; border-bottom: 1px solid #f1f1f1; cursor: pointer; transition: var(--transition); font-size: 0.85rem; user-select: none; }
+.time-slot { padding: 12px 10px; text-align: center; border-bottom: 1px solid #f1f1f1; cursor: pointer; transition: var(--transition); font-size: 0.9rem; user-select: none; min-height: 45px; display: flex; flex-direction: column; justify-content: center; }
 .time-slot:last-child { border-bottom: none; }
 .time-slot:not(.booked):not(.selected):hover { background-color: #f1f9de; color: var(--accent-text); }
 .time-slot.selected { background-color: var(--accent-color); color: #000; font-weight: 600; border-color: var(--accent-color); }
 
 .time-slot.booked { 
     background-color: #fff1f1; 
-    border-left: 3px solid var(--booked-color); 
+    border-left: 4px solid var(--booked-color); 
     color: #721c24; 
     cursor: not-allowed; 
     text-align: left; 
     font-size: 0.8rem; 
     word-break: break-word; 
+    justify-content: flex-start;
 }
-.time-slot.booked strong { color: var(--text-main); display: block; margin-bottom: 1px;}
+.time-slot.booked strong { color: var(--text-main); display: block; margin-bottom: 1px; font-size: 0.85rem;}
 
 /* PRZYCISKI */
-.primary-btn { display: block; width: 100%; max-width: 320px; margin: 25px auto; padding: 14px 20px; background-color: var(--accent-color); color: var(--accent-text); border: none; border-radius: 30px; font-family: var(--font-family); font-weight: 600; font-size: 1rem; cursor: pointer; transition: var(--transition); box-shadow: 0 4px 6px rgba(190, 242, 39, 0.2); }
+.primary-btn { display: block; width: 100%; max-width: 320px; margin: 25px auto; padding: 14px 20px; background-color: var(--accent-color); color: var(--accent-text); border: none; border-radius: 30px; font-family: var(--font-family); font-weight: 600; font-size: 1.05rem; cursor: pointer; transition: var(--transition); box-shadow: 0 4px 6px rgba(190, 242, 39, 0.2); }
 .primary-btn:hover { background-color: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(190, 242, 39, 0.3); }
 
-/* MODAL & RESZTA (bez zmian) */
+/* MODAL & RESZTA */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 15px; opacity: 0; transition: opacity 0.3s ease; }
 .modal.active { display: flex; opacity: 1; }
 .modal-content { background-color: var(--card-color); padding: 30px; border-radius: var(--radius-md); width: 100%; max-width: 480px; box-shadow: var(--shadow-md); transform: translateY(-20px); transition: transform 0.3s ease; }
 .modal.active .modal-content { transform: translateY(0); }
-.modal-content h2 { font-weight: 700; font-size: 1.5rem; margin-bottom: 5px; margin-top: 0; }
-.time-info { font-size: 0.85rem; background-color: #e6f7ff; color: #0366d6; padding: 8px; border-radius: var(--radius-sm); margin-bottom: 15px; font-weight: 500; }
-.form-group { margin-bottom: 12px; }
-.form-group label { display: block; font-weight: 500; font-size: 0.85rem; margin-bottom: 4px; }
-.form-group input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 1rem; background-color: #fcfcfc; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.modal-content h2 { font-weight: 700; font-size: 1.6rem; margin-bottom: 5px; margin-top: 0; }
+.time-info { font-size: 0.9rem; background-color: #e6f7ff; color: #0366d6; padding: 10px; border-radius: var(--radius-sm); margin-bottom: 20px; font-weight: 500; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; }
+.form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 1rem; background-color: #fcfcfc; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
 
-/* STYLE DLA PRZYCISKÓW KALENDARZA */
-#btnGoogleCalendar, #btnIcsCalendar { display: block; padding: 12px; text-decoration: none !important; text-align: center; border-radius: var(--radius-sm); font-weight: 500; font-size: 0.9rem; color: white !important; margin-bottom: 8px; }
+#successPin { font-size: 1.4rem; color: #0366d6; }
+#btnGoogleCalendar, #btnIcsCalendar { display: block; padding: 12px; text-decoration: none !important; text-align: center; border-radius: var(--radius-sm); font-weight: 500; font-size: 0.95rem; color: white !important; margin-bottom: 10px; }
 #btnGoogleCalendar { background-color: #4285F4; }
 #btnIcsCalendar { background-color: #333; }
 #closeSuccessBtn { background-color: #f1f3f5; color: #333; width: 100%; border: none; padding: 12px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
 
 /* MOBILE */
 @media (max-width: 600px) {
-    h1 { font-size: 1.4rem; }
-    .day-column { flex: 0 0 160px; } /* Na telefonie jeszcze ciut węższe żeby widzieć kawałek następnego dnia */
+    h1 { font-size: 1.6rem; }
+    .day-column { 
+        flex: 0 0 180px; /* Na telefonie kolumny są nieco węższe żeby sugerować scroll */
+    }
     .modal-actions { flex-direction: column-reverse; }
     .modal-actions button { width: 100%; }
 }
