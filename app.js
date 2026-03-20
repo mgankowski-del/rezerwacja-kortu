@@ -13,15 +13,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- KONFIGURACJA APLIKACJI ---
 const START_HOUR = 6;
 const END_HOUR = 24;
 const SLOT_DURATION_MINUTES = 30;
 const STORAGE_KEY = 'tennis_reservations';
-
-// Tuta wpisz swój tajny PIN administratora (może być dłuższy, np. 6 cyfr lub tekst)
-const MASTER_PIN = "21892387"; 
-
 let selectedSlots = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -121,7 +116,7 @@ async function handleCancelReservation(reservationId) {
         if (!confirmCancel) return;
         pinToVerify = localData.pin;
     } else {
-        const enteredPin = prompt("Ten termin jest już zajęty. Jeśli to Twoja rezerwacja (lub jesteś administratorem), podaj PIN, aby ją anulować:");
+        const enteredPin = prompt("Ten termin jest już zajęty. Jeśli to Twoja rezerwacja, podaj 4-cyfrowy PIN, aby ją anulować:");
         if (enteredPin === null || enteredPin.trim() === "") return; 
         pinToVerify = enteredPin.trim();
     }
@@ -133,8 +128,7 @@ async function handleCancelReservation(reservationId) {
         if (docSnap.exists()) {
             const dbPin = docSnap.data().pin;
             
-            // MAGIA ADMINISTRATORA: Akceptujemy PIN z bazy LUB nasz Master PIN
-            if (dbPin === pinToVerify || pinToVerify === MASTER_PIN) {
+            if (dbPin === pinToVerify) {
                 await deleteDoc(docRef);
                 
                 const bookedTimes = docSnap.data().bookedTimes || [];
