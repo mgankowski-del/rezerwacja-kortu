@@ -1,14 +1,14 @@
 {
-    "name": "Rezerwacja Kortu Tenisowego",
-    "short_name": "Nasz Kort",
-    "start_url": "./index.html",
+    "name": "Rezerwacja Kortu",
+    "short_name": "Kort",
+    "start_url": "./",
     "display": "standalone",
     "background_color": "#f0f2f5",
     "theme_color": "#28a745",
     "icons": [
       {
         "src": "icon.png",
-        "sizes": "192x192 512x512",
+        "sizes": "512x512",
         "type": "image/png",
         "purpose": "any maskable"
       }

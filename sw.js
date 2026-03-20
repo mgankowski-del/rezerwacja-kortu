@@ -1,8 +1,7 @@
-// Ten plik to tylko wymóg formalny przeglądarek, żeby uznały stronę za aplikację PWA.
 self.addEventListener('install', (e) => {
-    console.log('[Service Worker] Zainstalowano');
+    self.skipWaiting();
 });
 
 self.addEventListener('fetch', (e) => {
-    // Pusty nasłuchiwacz - strona działa normalnie przez internet
+    // Pusty nasłuchiwacz, żeby strona zaliczyła test PWA
 });
