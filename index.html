@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rezerwacja Kortu - Triton Country</title>
+    <title>Kort Tenisowy - Triton Country</title>
     
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="icon" href="apple-touch-icon.png">
@@ -15,11 +15,63 @@
         <header style="text-align: center; margin-bottom: 20px;">
             <h1>Rezerwacja Kortu</h1>
             <p>Mieszkańcy Triton Country</p>
+            <button id="openBoardBtn" class="partner-btn">🎾 Znajdź partnera do gry</button>
         </header>
 
         <div id="calendar" class="calendar-grid"></div>
-
         <button id="reserveBtn" class="primary-btn" style="display: none;">Zarezerwuj wybrane terminy</button>
+    </div>
+
+    <div id="partnerBoard" class="board-overlay">
+        <div class="board-content">
+            <div class="board-header">
+                <h2>Giełda Graczy</h2>
+                <button id="closeBoardBtn" class="back-to-cal">Wróć do kalendarza</button>
+            </div>
+            
+            <button id="addPostBtn" class="add-post-btn">+ Dodaj swoje ogłoszenie</button>
+            
+            <div id="postsList" class="posts-container">
+                </div>
+        </div>
+    </div>
+
+    <div id="postModal" class="modal">
+        <div class="modal-content">
+            <h2>Szukam partnera</h2>
+            <div class="form-group">
+                <label>Imię</label>
+                <input type="text" id="postName" placeholder="np. Michał">
+            </div>
+            <div class="form-group">
+                <label>Ulica i nr</label>
+                <input type="text" id="postAddress" placeholder="np. Słowika 24">
+            </div>
+            <div class="form-group">
+                <label>Poziom gry</label>
+                <select id="postLevel">
+                    <option value="Początkujący">🟢 Początkujący</option>
+                    <option value="Średniozaawansowany" selected>🟡 Średniozaawansowany</option>
+                    <option value="Zaawansowany">🔴 Zaawansowany / Pro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Kiedy możesz grać?</label>
+                <input type="text" id="postAvailability" placeholder="np. Pn-Pt po 17:00, weekendy">
+            </div>
+            <div class="form-group">
+                <label>Kontakt (tel lub nr domu)</label>
+                <input type="text" id="postContact" placeholder="np. 500 600 700">
+            </div>
+            <div class="form-group">
+                <label>PIN (do usuwania ogłoszenia)</label>
+                <input type="number" id="postPin">
+            </div>
+            <div class="modal-actions">
+                <button id="cancelPostBtn" class="secondary-btn">Anuluj</button>
+                <button id="savePostBtn" class="confirm-btn">Opublikuj</button>
+            </div>
+        </div>
     </div>
 
     <div id="bookingModal" class="modal">
@@ -49,16 +101,7 @@
             <h2 style="color: #059669;">Zarezerwowano!</h2>
             <p>Twój PIN do odwołania:</p>
             <h1 id="successPin" style="color: #1a2a47; margin: 15px 0; font-size: 3rem; letter-spacing: 2px;"></h1>
-            
-            <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
-                <p style="font-size: 0.9rem; margin-bottom: 12px; font-weight: 700; color: #1a2a47;">📅 Dodaj do kalendarza:</p>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <a id="googleCalBtn" target="_blank" class="calendar-link-btn" style="background: #4285F4; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: 700;">Google Calendar</a>
-                    <button id="icsCalBtn" class="calendar-link-btn" style="background: #34a853; color: white; padding: 12px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer;">Apple / iOS / Outlook</button>
-                </div>
-            </div>
-
-            <button id="closeSuccessBtn" class="secondary-btn" style="width: 100%; margin-top: 25px; padding: 15px;">Zamknij</button>
+            <button id="closeSuccessBtn" class="secondary-btn" style="width: 100%; margin-top: 20px; padding: 15px;">Zamknij</button>
         </div>
     </div>
 
