@@ -31,8 +31,7 @@
             
             <button id="addPostBtn" class="add-post-btn">+ Dodaj swoje ogłoszenie</button>
             
-            <div id="postsList" class="posts-container">
-                </div>
+            <div id="postsList" class="posts-container"></div>
         </div>
     </div>
 
@@ -101,7 +100,16 @@
             <h2 style="color: #059669;">Zarezerwowano!</h2>
             <p>Twój PIN do odwołania:</p>
             <h1 id="successPin" style="color: #1a2a47; margin: 15px 0; font-size: 3rem; letter-spacing: 2px;"></h1>
-            <button id="closeSuccessBtn" class="secondary-btn" style="width: 100%; margin-top: 20px; padding: 15px;">Zamknij</button>
+            
+            <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
+                <p style="font-size: 0.9rem; margin-bottom: 12px; font-weight: 700; color: #1a2a47;">📅 Dodaj do kalendarza:</p>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a id="googleCalBtn" target="_blank" class="calendar-link-btn" style="background: #4285F4; color: white; text-decoration: none; padding: 12px; border-radius: 12px; font-weight: 700;">Google Calendar</a>
+                    <button id="icsCalBtn" class="calendar-link-btn" style="background: #34a853; color: white; padding: 12px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer;">Apple / iOS / Outlook</button>
+                </div>
+            </div>
+
+            <button id="closeSuccessBtn" class="secondary-btn" style="width: 100%; margin-top: 25px; padding: 15px;">Zamknij</button>
         </div>
     </div>
 

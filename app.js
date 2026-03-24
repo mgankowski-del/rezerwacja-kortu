@@ -18,7 +18,10 @@ const partnerBoardCol = collection(db, "partner_board");
 let allReservations = [];
 let selectedSlots = [];
 
-// POMOCNICZE
+// ==========================================
+// FUNKCJE POMOCNICZE
+// ==========================================
+
 function getPrevTime(time) {
     let [h, m] = time.split(':').map(Number);
     if (m === 30) m = 0; else { h -= 1; m = 30; }
@@ -51,8 +54,9 @@ function findConnectedBlock(targetTime, targetDate, targetName, list) {
         for (let r of dayRes) {
             if (block.includes(r)) continue;
             const isNeighbor = block.some(b => {
-                if (r.bookedTimes) return r.bookedTimes.some(t => getNextTime(b.time) === t.split('T')[1] || getPrevTime(b.time) === t.split('T')[1]);
-                return getNextTime(b.time) === r.time || getPrevTime(b.time) === r.time;
+                const bTime = b.time || (b.bookedTimes ? b.bookedTimes[0].split('T')[1] : "");
+                if (r.bookedTimes) return r.bookedTimes.some(t => getNextTime(bTime) === t.split('T')[1] || getPrevTime(bTime) === t.split('T')[1]);
+                return getNextTime(bTime) === r.time || getPrevTime(bTime) === r.time;
             });
             if (isNeighbor) { block.push(r); foundNew = true; }
         }
@@ -61,7 +65,8 @@ function findConnectedBlock(targetTime, targetDate, targetName, list) {
 }
 
 function getReservationRange(res, allRes, dateStr) {
-    const block = findConnectedBlock(res.time || (res.bookedTimes ? res.bookedTimes[0].split('T')[1] : ""), dateStr, res.firstName, allRes);
+    const timeToSearch = res.time || (res.bookedTimes ? res.bookedTimes[0].split('T')[1] : "");
+    const block = findConnectedBlock(timeToSearch, dateStr, res.firstName, allRes);
     if (block.length === 0) return "";
     block.sort((a, b) => (a.time || a.bookedTimes[0].split('T')[1]).localeCompare(b.time || b.bookedTimes[0].split('T')[1]));
     const start = block[0].time || block[0].bookedTimes[0].split('T')[1];
@@ -71,7 +76,32 @@ function getReservationRange(res, allRes, dateStr) {
     return `${start}-${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 }
 
-// KALENDARZ
+// PRZYWRÓCONO: GENEROWANIE LINKÓW DO KALENDARZA
+function generateCalendarLinks(slots) {
+    if (slots.length === 0) return;
+    slots.sort((a, b) => a.time.localeCompare(b.time));
+    const date = slots[0].date.replace(/-/g, '');
+    const startTime = slots[0].time.replace(':', '') + '00';
+    let [h, m] = slots[slots.length - 1].time.split(':').map(Number);
+    m += 30; if (m === 60) { h += 1; m = 0; }
+    const endTime = `${h.toString().padStart(2, '0')}${m.toString().padStart(2, '0')}00`;
+    const title = encodeURIComponent("Kort Tenisowy - Triton");
+    const dates = `${date}T${startTime}/${date}T${endTime}`;
+
+    document.getElementById("googleCalBtn").href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}`;
+    document.getElementById("icsCalBtn").onclick = () => {
+        const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${date}T${startTime}\nDTEND:${date}T${endTime}\nSUMMARY:Kort Tenisowy\nEND:VEVENT\nEND:VCALENDAR`;
+        const blob = new Blob([ics], { type: 'text/calendar' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'rezerwacja.ics'; a.click();
+    };
+}
+
+// ==========================================
+// REZERWACJA KORTU
+// ==========================================
+
 function renderCalendar() {
     const calendarEl = document.getElementById("calendar");
     if (!calendarEl) return;
@@ -116,7 +146,7 @@ function toggleSelectSlot(date, time) {
     else {
         const fName = localStorage.getItem('userName') || "Użytkownik";
         const virtualAll = [...allReservations, ...selectedSlots.map(s => ({...s, firstName: fName})), {date, time, firstName: fName}];
-        if (findConnectedBlock(time, date, fName, virtualAll).length > 4) return alert("Max 2h bez przerwy!");
+        if (findConnectedBlock(time, date, fName, virtualAll).length > 4) return alert("Pojedynczy blok rezerwacji nie może przekraczać 2 godzin!");
         selectedSlots.push({ date, time });
     }
     document.getElementById("reserveBtn").style.display = selectedSlots.length > 0 ? "block" : "none";
@@ -128,28 +158,38 @@ async function confirmBooking() {
     const addr = document.getElementById("inputAddress").value.trim();
     const pin = document.getElementById("inputPin").value;
     if (!fName || !addr || pin.length < 4) return alert("Wypełnij dane!");
-    localStorage.setItem('userName', fName); localStorage.setItem('userAddress', addr); localStorage.setItem('userPin', pin);
+    
+    localStorage.setItem('userName', fName);
+    localStorage.setItem('userAddress', addr);
+    localStorage.setItem('userPin', pin);
+
+    // Wygeneruj linki do kalendarza przed wyczyszczeniem wybranych slotów
+    generateCalendarLinks([...selectedSlots]);
+
     for (let s of selectedSlots) await addDoc(reservationsCol, { ...s, firstName: fName, address: addr, pin: pin });
-    selectedSlots = []; document.getElementById("bookingModal").classList.remove("active");
-    document.getElementById("successPin").innerText = pin; document.getElementById("successModal").classList.add("active");
+    selectedSlots = [];
+    document.getElementById("bookingModal").classList.remove("active");
+    document.getElementById("successPin").innerText = pin;
+    document.getElementById("successModal").classList.add("active");
 }
 
 async function cancelReservation(res, date, time) {
     const savedPin = localStorage.getItem('userPin');
     let shouldDelete = false;
     if (savedPin === res.pin || savedPin === "9988") {
-        if (confirm("Usunąć rezerwację?")) shouldDelete = true;
+        if (confirm(`Usunąć rezerwację?`)) shouldDelete = true;
     } else {
-        const pin = prompt("Podaj PIN:");
+        const pin = prompt(`Podaj PIN dla ${res.firstName}:`);
         if (pin === res.pin || pin === "9988") shouldDelete = true;
+        else if (pin !== null) alert("Błędny PIN!");
     }
     if (shouldDelete) {
-        const block = findConnectedBlock(time, date, res.firstName, allReservations);
-        for (let item of block) await deleteDoc(doc(db, "reservations", item.id));
+        const blockToDel = findConnectedBlock(time, date, res.firstName, allReservations);
+        for (let item of blockToDel) await deleteDoc(doc(db, "reservations", item.id));
     }
 }
 
-// GIEŁDA
+// GIEŁDA GRACZY
 const boardOverlay = document.getElementById("partnerBoard");
 const postModal = document.getElementById("postModal");
 
@@ -187,8 +227,11 @@ window.deletePost = async (id, correctPin) => {
     }
 };
 
-// NASŁUCHIWANIE
-onSnapshot(reservationsCol, (snap) => { allReservations = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderCalendar(); });
+// NASŁUCHIWANIE BAZY
+onSnapshot(reservationsCol, (snap) => { 
+    allReservations = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
+    renderCalendar(); 
+});
 
 onSnapshot(partnerBoardCol, (snap) => {
     const list = document.getElementById("postsList"); if (!list) return; list.innerHTML = "";
