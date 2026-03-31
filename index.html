@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kort Tenisowy - Triton Country</title>
-    
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="icon" href="apple-touch-icon.png">
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,60 +26,42 @@
                 <h2>Giełda Graczy</h2>
                 <button id="closeBoardBtn" class="back-to-cal">Wróć do kalendarza</button>
             </div>
-            
             <button id="addPostBtn" class="add-post-btn">+ Dodaj swoje ogłoszenie</button>
-            
             <div id="postsList" class="posts-container"></div>
-        </div>
-    </div>
-
-    <div id="postModal" class="modal">
-        <div class="modal-content">
-            <h2>Szukam partnera</h2>
-            <div class="form-group">
-                <label>Imię</label>
-                <input type="text" id="postName" placeholder="np. Michał">
-            </div>
-            <div class="form-group">
-                <label>Ulica i nr</label>
-                <input type="text" id="postAddress" placeholder="np. Słowika 24">
-            </div>
-            <div class="form-group">
-                <label>Poziom gry</label>
-                <select id="postLevel">
-                    <option value="Początkujący">🟢 Początkujący</option>
-                    <option value="Średniozaawansowany" selected>🟡 Średniozaawansowany</option>
-                    <option value="Zaawansowany">🔴 Zaawansowany / Pro</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Kiedy możesz grać?</label>
-                <input type="text" id="postAvailability" placeholder="np. Pn-Pt po 17:00, weekendy">
-            </div>
-            <div class="form-group">
-                <label>Kontakt (tel lub nr domu)</label>
-                <input type="text" id="postContact" placeholder="np. 500 600 700">
-            </div>
-            <div class="form-group">
-                <label>PIN (do usuwania ogłoszenia)</label>
-                <input type="number" id="postPin">
-            </div>
-            <div class="modal-actions">
-                <button id="cancelPostBtn" class="secondary-btn">Anuluj</button>
-                <button id="savePostBtn" class="confirm-btn">Opublikuj</button>
-            </div>
         </div>
     </div>
 
     <div id="bookingModal" class="modal">
         <div class="modal-content">
-            <h2>Dane rezerwacji</h2>
+            <button class="close-x cancel-modal-btn">&times;</button>
+            <h2 id="modalTitle">Dane rezerwacji</h2>
             <div class="form-group">
-                <label>Imię</label>
+                <label>Imię (Wpisz kod trenera, by stworzyć szkolenie)</label>
                 <input type="text" id="inputFirstName" placeholder="np. Michał">
             </div>
+            
+            <div id="workshopFields" style="display: none; background: #f0f7ff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #dbeafe;">
+                <label style="color: #0056b3; font-weight: 800; display: block; margin-bottom: 10px;">✨ USTAWIENIA SZKOLENIA</label>
+                <div class="form-group">
+                    <label>Imię Trenera (widoczne na przycisku)</label>
+                    <input type="text" id="inputCoachDisplayName" placeholder="np. Maciek">
+                </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div class="form-group" style="flex: 1;"><label>Miejsca</label><input type="number" id="inputMaxSpots" value="4"></div>
+                    <div class="form-group" style="flex: 1;"><label>Wpłata (zł)</label><input type="number" id="inputDonation" placeholder="np. 20"></div>
+                </div>
+                <div class="form-group">
+                    <label>Numer telefonu do BLIK</label>
+                    <input type="text" id="inputBlik" placeholder="np. 600 700 800">
+                </div>
+                <div class="form-group">
+                    <label>Wiadomość dla rodziców (notatka)</label>
+                    <input type="text" id="inputCoachNote" placeholder="np. Weźcie wodę">
+                </div>
+            </div>
+
             <div class="form-group">
-                <label>Ulica i nr domu</label>
+                <label id="labelAddress">Ulica i nr domu / Opis</label>
                 <input type="text" id="inputAddress" placeholder="np. Słowika 24">
             </div>
             <div class="form-group">
@@ -89,27 +69,83 @@
                 <input type="number" id="inputPin">
             </div>
             <div class="modal-actions">
-                <button id="cancelModalBtn" class="secondary-btn">Anuluj</button>
                 <button id="confirmBookingBtn" class="confirm-btn">Potwierdź</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="joinWorkshopModal" class="modal">
+        <div class="modal-content" style="max-width: 480px;">
+            <button id="cancelJoinBtn" class="close-x">&times;</button>
+            
+            <div class="board-header" style="margin-bottom: 15px;">
+                <div>
+                    <h2 style="font-size: 1.4rem; margin: 0;">Szkolenie Tenisowe</h2>
+                    <button id="coachDashboardBtn" class="coach-link-btn">Trener ...</button>
+                </div>
+            </div>
+            
+            <div id="workshopDescriptionBox" class="info-box-blue">
+                <p id="workshopDescriptionText" style="font-weight: 700; color: #1e3a8a; margin: 0;"></p>
+            </div>
+
+            <div id="coachNoteBox" class="info-box-yellow" style="display: none;">
+                <p id="coachNoteText" style="font-size: 0.9rem; margin: 0; color: #856404; font-weight: 600;"></p>
+            </div>
+
+            <div id="donationBox" class="info-box-green">
+                <p style="font-size: 0.8rem; margin: 0;">Sugerowana wpłata na modernizację: <strong id="donationValue">0 zł</strong></p>
+                <p style="font-size: 0.85rem; margin-top: 4px; font-weight: 700;">BLIK: <span id="blikValue">---</span></p>
+            </div>
+
+            <div id="participantsSection" style="margin-bottom: 20px;">
+                <label style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; display: block; margin-bottom: 8px;">Zapisani (Wolne: <span id="spotsLeftCount"></span>):</label>
+                <div id="participantsList" class="p-list-container"></div>
+            </div>
+
+            <div id="joinForm">
+                <label style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; color: #1a2a47; display: block; margin-bottom: 10px;">Zapisz dziecko:</label>
+                <div class="form-group"><input type="text" id="joinName" placeholder="Imię dziecka"></div>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="number" id="joinAge" placeholder="Wiek" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <input type="text" id="joinAddress" placeholder="Twój nr domu" style="flex: 2; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                </div>
+                <div class="form-group">
+                    <input type="number" id="joinPin" placeholder="Twój PIN (4 cyfry do wypisania)">
+                </div>
+                <button id="confirmJoinBtn" class="confirm-btn" style="width: 100%;">Potwierdź zapis</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="coachDashboardModal" class="modal">
+        <div class="modal-content" style="border: 2px solid #1a2a47;">
+            <button class="close-x" id="closeCoachDashBtn">&times;</button>
+            <h2 style="color: #1a2a47;">Panel Trenera</h2>
+            <div class="form-group" style="margin-top: 15px;">
+                <label>Zmień notatkę dla rodziców</label>
+                <textarea id="editCoachNote" style="width: 100%; height: 80px; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-family: inherit;"></textarea>
+            </div>
+            <button id="saveNoteBtn" class="confirm-btn" style="width: 100%; background: #3b82f6;">Zapisz nową treść</button>
+            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                <button id="coachCancelFullBtn" class="secondary-btn" style="width: 100%; color: #ef4444; background: #fee2e2; border: 1px solid #fca5a5;">Odwołaj całe szkolenie</button>
             </div>
         </div>
     </div>
 
     <div id="successModal" class="modal">
         <div class="modal-content" style="text-align: center;">
-            <h2 style="color: #059669;">Zarezerwowano!</h2>
-            <p>Twój PIN do odwołania:</p>
-            <h1 id="successPin" style="color: #1a2a47; margin: 15px 0; font-size: 3rem; letter-spacing: 2px;"></h1>
-            
-            <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
-                <p style="font-size: 0.9rem; margin-bottom: 12px; font-weight: 700; color: #1a2a47;">📅 Dodaj do kalendarza:</p>
+            <button class="close-x" id="closeSuccessBtn">&times;</button>
+            <h2 id="successTitle" style="color: #059669;">Sukces!</h2>
+            <p id="successText">Zapisano pomyślnie. Twój PIN:</p>
+            <h1 id="successPin" style="color: #1a2a47; margin: 15px 0; font-size: 3rem;"></h1>
+            <div style="border-top: 1px solid #eee; padding-top: 15px;">
+                <p style="font-size: 0.9rem; margin-bottom: 12px; font-weight: 700;">📅 Dodaj do kalendarza:</p>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <a id="googleCalBtn" target="_blank" class="calendar-link-btn" style="background: #4285F4; color: white; text-decoration: none; padding: 12px; border-radius: 12px; font-weight: 700;">Google Calendar</a>
-                    <button id="icsCalBtn" class="calendar-link-btn" style="background: #34a853; color: white; padding: 12px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer;">Apple / iOS / Outlook</button>
+                    <button id="icsCalBtn" style="background: #34a853; color: white; padding: 12px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer;">Apple / Outlook</button>
                 </div>
             </div>
-
-            <button id="closeSuccessBtn" class="secondary-btn" style="width: 100%; margin-top: 25px; padding: 15px;">Zamknij</button>
         </div>
     </div>
 
