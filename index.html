@@ -53,6 +53,10 @@
                 </select>
             </div>
             <div class="form-group">
+                <label>Kiedy / Dostępność</label>
+                <input type="text" id="postAvailability" placeholder="np. Pon-Pt po 17:00, weekendy">
+            </div>
+            <div class="form-group">
                 <label>Kontakt (tel / whatsapp)</label>
                 <input type="text" id="postContact" placeholder="np. 500 600 700">
             </div>
@@ -69,7 +73,7 @@
             <button class="close-x cancel-modal-btn">&times;</button>
             <h2 id="modalTitle">Dane rezerwacji</h2>
             <div class="form-group">
-                <label>Imię (Hasło trenera wyzwala tryb zajęć)</label>
+                <label>Imię (Wpisz kod trenera dla trybu zajęć)</label>
                 <input type="text" id="inputFirstName" placeholder="Twoje imię">
             </div>
             
@@ -112,26 +116,23 @@
                 <h2 style="font-size: 1.4rem; margin: 0;">Szkolenie Tenisowe</h2>
                 <button id="coachDashboardBtn" class="coach-link-btn">Trener ...</button>
             </div>
-            
             <div id="workshopDescriptionBox" class="info-box-blue"><p id="workshopDescriptionText" style="font-weight: 700; color: #1e3a8a; margin: 0;"></p></div>
             <div id="coachNoteBox" class="info-box-yellow" style="display: none;"><p id="coachNoteText" style="font-size: 0.9rem; margin: 0; color: #856404; font-weight: 600; white-space: pre-wrap;"></p></div>
             <div id="donationBox" class="info-box-green">
                 <p style="font-size: 0.8rem; margin: 0;">Sugerowana wpłata: <strong id="donationValue">0 zł</strong></p>
                 <p style="font-size: 0.85rem; margin-top: 4px; font-weight: 700;">BLIK: <span id="blikValue">---</span></p>
             </div>
-
             <div id="participantsSection" style="margin-bottom: 20px;">
-                <label style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; display: block; margin-bottom: 8px;">Lista uczestników (Wolne: <span id="spotsLeftCount"></span>):</label>
+                <label style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; display: block; margin-bottom: 8px;">Uczestnicy (Wolne: <span id="spotsLeftCount"></span>):</label>
                 <div id="participantsList" class="p-list-container"></div>
             </div>
-
             <div id="joinForm">
                 <div class="form-group"><input type="text" id="joinName" placeholder="Imię dziecka"></div>
                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                     <input type="number" id="joinAge" placeholder="Wiek" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0;">
                     <input type="text" id="joinAddress" placeholder="Nr domu" style="flex: 2; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0;">
                 </div>
-                <div class="form-group"><input type="number" id="joinPin" placeholder="Twój PIN (do ew. wypisania)"></div>
+                <div class="form-group"><input type="number" id="joinPin" placeholder="PIN (4 cyfry do ew. wypisania)"></div>
                 <button id="confirmJoinBtn" class="confirm-btn" style="width: 100%;">Zapisz dziecko i dodaj do kalendarza</button>
             </div>
         </div>
@@ -156,8 +157,7 @@
         <div class="modal-content" style="text-align: center;">
             <button class="close-x" id="closeSuccessBtn">&times;</button>
             <h2 id="successTitle" style="color: #059669;">Sukces!</h2>
-            <p id="successText">Operacja zakończona. Twój PIN:</p>
-            <h1 id="successPin" style="color: #1a2a47; margin: 15px 0; font-size: 3rem;"></h1>
+            <p id="successPin" style="color: #1a2a47; margin: 15px 0; font-size: 3rem;"></p>
             <div style="border-top: 1px solid #eee; padding-top: 15px;">
                 <p style="font-size: 0.9rem; margin-bottom: 12px; font-weight: 700;">📅 Dodaj do kalendarza:</p>
                 <div style="display: flex; flex-direction: column; gap: 10px;">

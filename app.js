@@ -59,7 +59,7 @@ function getRange(res, allRes, dateStr) {
     return `${s}-${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 }
 
-// KALENDARZ I EKSPORT
+// KALENDARZ
 function generateCalendarLinks(slots) {
     if (!slots.length) return;
     slots.sort((a, b) => a.time.localeCompare(b.time));
@@ -175,7 +175,7 @@ function openJoinWorkshop(res) {
     else noteBox.style.display = "none";
     const listDiv = document.getElementById("participantsList");
     listDiv.innerHTML = (res.participants && res.participants.length > 0) 
-        ? res.participants.map((p, i) => `<div class="participant-item"><div><strong>${p.name}</strong> (${p.age} l.)</div><button class="leave-btn" onclick="removeParticipant(${i})">Wypisz</button></div>`).join("")
+        ? res.participants.map((p, i) => `<div class="participant-item"><div><strong>${p.name}</strong></div><button class="leave-btn" onclick="removeParticipant(${i})">Wypisz</button></div>`).join("")
         : "Brak zapisów.";
     document.getElementById("joinForm").style.display = (savedPin === res.pin || savedPin === "9988") ? "none" : "block";
     document.getElementById("joinWorkshopModal").classList.add("active");
@@ -203,14 +203,15 @@ document.getElementById("confirmJoinBtn").onclick = async () => {
     document.getElementById("successPin").innerText = pin; document.getElementById("successModal").classList.add("active");
 };
 
-// GIEŁDA GRACZY (PRZYWRÓCONA LOGIKA)
+// GIEŁDA (POPRAWIONA LOGIKA Z DOSTĘPNOŚCIĄ)
 document.getElementById("savePostBtn").onclick = async () => {
     const name = document.getElementById("postName").value.trim();
     const addr = document.getElementById("postAddress").value.trim();
+    const avail = document.getElementById("postAvailability").value.trim();
     const pin = document.getElementById("postPin").value;
-    if (!name || !addr || pin.length < 4) return alert("Wypełnij wszystkie pola!");
+    if (!name || !addr || !avail || pin.length < 4) return alert("Wypełnij wszystkie pola!");
     await addDoc(partnerBoardCol, {
-        name, address: addr, level: document.getElementById("postLevel").value,
+        name, address: addr, avail, level: document.getElementById("postLevel").value,
         contact: document.getElementById("postContact").value, pin, createdAt: new Date().toISOString()
     });
     document.getElementById("postModal").classList.remove("active");
@@ -236,14 +237,22 @@ onSnapshot(partnerBoardCol, (snap) => {
             <div class="post-level ${lvlClass}">${post.level}</div>
             <button class="leave-btn" style="position:absolute; top:15px; right:15px;" onclick="deletePost('${post.id}','${post.pin}')">Usuń</button>
             <h3 style="margin: 0 0 5px 0;">${post.name}</h3>
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">Dom: ${post.address}</div>
-            <div style="background: #fff; padding: 10px; border-radius: 10px; font-weight: 700; color: #1a2a47; border: 1px solid #edf2f7;">📞 ${post.contact}</div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Dom: ${post.address}</div>
+            <div style="font-size: 0.85rem; color: #1e3a8a; font-weight: 700; margin-bottom: 12px;">📅 ${post.avail}</div>
+            <div style="background: #fff; padding: 10px; border-radius: 10px; font-weight: 700; color: #1a2a47; border: 1px solid #edf2f7; display: flex; align-items: center; gap: 8px;">
+                <span>📞</span> ${post.contact}
+            </div>
         `;
         list.appendChild(card);
     });
 });
 
 // PANEL TRENERA I RESZTA
+function openCoachDashboard() {
+    document.getElementById("editCoachNote").value = activeWorkshop.coachNote || "";
+    document.getElementById("coachDashboardModal").classList.add("active");
+}
+
 document.getElementById("coachDashboardBtn").onclick = () => {
     const savedPin = localStorage.getItem('userPin');
     if (savedPin === activeWorkshop.pin || savedPin === "9988") openCoachDashboard();
@@ -253,11 +262,6 @@ document.getElementById("coachDashboardBtn").onclick = () => {
     }
 };
 
-function openCoachDashboard() {
-    document.getElementById("editCoachNote").value = activeWorkshop.coachNote || "";
-    document.getElementById("coachDashboardModal").classList.add("active");
-}
-
 document.getElementById("saveNoteBtn").onclick = async () => {
     await updateDoc(doc(db, "reservations", activeWorkshop.id), { coachNote: document.getElementById("editCoachNote").value.trim() });
     alert("Zaktualizowano!"); document.getElementById("coachDashboardModal").classList.remove("active");
@@ -266,7 +270,7 @@ document.getElementById("saveNoteBtn").onclick = async () => {
 document.getElementById("coachCancelFullBtn").onclick = () => {
     if (confirm("Odwołać zajęcia?")) {
         cancelReservation(activeWorkshop, activeWorkshop.date, activeWorkshop.time);
-        document.querySelectorAll(".modal").forEach(m => m.classList.remove("active"));
+        document.querySelectorAll(".modal, .board-overlay").forEach(m => {m.classList.remove("active"); m.style.display="none";});
     }
 };
 
@@ -287,20 +291,17 @@ onSnapshot(reservationsCol, (snap) => {
     renderCalendar();
     if (activeWorkshop) {
         const updated = allReservations.find(r => r.id === activeWorkshop.id);
-        if (updated) refreshModalUI(updated);
+        if (updated) {
+            const taken = updated.participants ? updated.participants.length : 0;
+            document.getElementById("spotsLeftCount").innerText = updated.maxSpots - taken;
+            document.getElementById("coachNoteText").innerText = updated.coachNote || "";
+            document.getElementById("coachNoteBox").style.display = updated.coachNote ? "block" : "none";
+            document.getElementById("participantsList").innerHTML = (updated.participants && updated.participants.length > 0) 
+                ? updated.participants.map((p, i) => `<div class="participant-item"><div><strong>${p.name}</strong></div><button class="leave-btn" onclick="removeParticipant(${i})">Wypisz</button></div>`).join("")
+                : "Brak zapisów.";
+        }
     }
 });
-
-function refreshModalUI(res) {
-    activeWorkshop = res;
-    const taken = res.participants ? res.participants.length : 0;
-    document.getElementById("spotsLeftCount").innerText = res.maxSpots - taken;
-    document.getElementById("coachNoteText").innerText = res.coachNote || "";
-    document.getElementById("coachNoteBox").style.display = res.coachNote ? "block" : "none";
-    document.getElementById("participantsList").innerHTML = (res.participants && res.participants.length > 0) 
-        ? res.participants.map((p, i) => `<div class="participant-item"><div><strong>${p.name}</strong></div><button class="leave-btn" onclick="removeParticipant(${i})">Wypisz</button></div>`).join("")
-        : "Brak zapisów.";
-}
 
 document.getElementById("openBoardBtn").onclick = () => document.getElementById("partnerBoard").style.display = "block";
 document.getElementById("closeBoardBtn").onclick = () => document.getElementById("partnerBoard").style.display = "none";
