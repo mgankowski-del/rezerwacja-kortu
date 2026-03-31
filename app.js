@@ -13,13 +13,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const reservationsCol = collection(db, "reservations");
+const partnerBoardCol = collection(db, "partner_board");
 
 const SECRET_COACH_KOD = "TRENER2026"; 
 let allReservations = [];
 let selectedSlots = [];
-let activeWorkshop = null; // Przechowuje obiekt aktualnie otwartego szkolenia
+let activeWorkshop = null;
 
-// POMOCNICZE CZASU
+// POMOCNICZE
 function getPrevTime(t) { let [h, m] = t.split(':').map(Number); if (m === 30) m = 0; else { h -= 1; m = 30; } return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`; }
 function getNextTime(t) { let [h, m] = t.split(':').map(Number); if (m === 0) m = 30; else { h += 1; m = 0; } return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`; }
 
@@ -58,7 +59,7 @@ function getRange(res, allRes, dateStr) {
     return `${s}-${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 }
 
-// KALENDARZ
+// KALENDARZ I EKSPORT
 function generateCalendarLinks(slots) {
     if (!slots.length) return;
     slots.sort((a, b) => a.time.localeCompare(b.time));
@@ -67,13 +68,12 @@ function generateCalendarLinks(slots) {
     let [h, m] = slots[slots.length-1].time.split(':').map(Number);
     m += 30; if (m === 60) { h += 1; m = 0; }
     const endTime = `${h.toString().padStart(2, '0')}${m.toString().padStart(2, '0')}00`;
-    const title = encodeURIComponent("Kort Tenisowy - Triton");
-    document.getElementById("googleCalBtn").href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${date}T${startTime}/${date}T${endTime}`;
+    document.getElementById("googleCalBtn").href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Tenis&dates=${date}T${startTime}/${date}T${endTime}`;
     document.getElementById("icsCalBtn").onclick = () => {
-        const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${date}T${startTime}\nDTEND:${date}T${endTime}\nSUMMARY:Kort Tenisowy\nEND:VEVENT\nEND:VCALENDAR`;
+        const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${date}T${startTime}\nDTEND:${date}T${endTime}\nSUMMARY:Tenis\nEND:VEVENT\nEND:VCALENDAR`;
         const blob = new Blob([ics], { type: 'text/calendar' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = 'rezerwacja.ics'; a.click();
+        const a = document.createElement('a'); a.href = url; a.download = 'tenis.ics'; a.click();
     };
 }
 
@@ -101,13 +101,7 @@ function renderCalendar() {
                     else {
                         const range = getRange(res, allReservations, dateStr);
                         let userText = isWorkshop ? `🏆 ${res.address}` : `${res.firstName}, ${res.address}`;
-                        let content = `<div class="res-content"><div class="res-time">${range}</div><div class="res-user">${userText}</div>`;
-                        if (isWorkshop) {
-                            const taken = res.participants ? res.participants.length : 0;
-                            content += `<div class="spots-left">Wolne: ${res.maxSpots - taken}</div>`;
-                        }
-                        content += `</div>`;
-                        slotDiv.innerHTML = content;
+                        slotDiv.innerHTML = `<div class="res-content"><div class="res-time">${range}</div><div class="res-user">${userText}</div>${isWorkshop ? `<div class="spots-left">Wolne: ${res.maxSpots - (res.participants?res.participants.length:0)}</div>` : ""}</div>`;
                     }
                     slotDiv.onclick = () => isWorkshop ? openJoinWorkshop(res) : cancelReservation(res, dateStr, timeStr);
                 } else {
@@ -135,7 +129,7 @@ function toggleSelectSlot(date, time) {
     renderCalendar();
 }
 
-// LOGIKA SZKOLEŃ
+// SZKOLENIA
 document.getElementById("inputFirstName").oninput = (e) => {
     const isCoach = (e.target.value.trim() === SECRET_COACH_KOD);
     document.getElementById("workshopFields").style.display = isCoach ? "block" : "none";
@@ -147,17 +141,17 @@ async function confirmBooking() {
     const addr = document.getElementById("inputAddress").value.trim();
     const pin = document.getElementById("inputPin").value;
     const isWorkshop = (fName === SECRET_COACH_KOD);
-    if (!fName || !addr || pin.length < 4) return alert("Wypełnij pola i podaj PIN!");
+    if (!fName || !addr || pin.length < 4) return alert("Wypełnij pola!");
     generateCalendarLinks([...selectedSlots]);
     for (let s of selectedSlots) {
         const data = { ...s, firstName: fName, address: addr, pin: pin };
         if (isWorkshop) { 
             data.type = "workshop"; 
-            data.maxSpots = parseInt(document.getElementById("inputMaxSpots").value) || 4;
-            data.donation = document.getElementById("inputDonation").value || 0;
-            data.blik = document.getElementById("inputBlik").value.trim() || "---";
-            data.coachNote = document.getElementById("inputCoachNote").value.trim() || "";
-            data.coachName = document.getElementById("inputCoachDisplayName").value.trim() || "Trener";
+            data.maxSpots = parseInt(document.getElementById("inputMaxSpots").value);
+            data.donation = document.getElementById("inputDonation").value;
+            data.blik = document.getElementById("inputBlik").value;
+            data.coachNote = document.getElementById("inputCoachNote").value;
+            data.coachName = document.getElementById("inputCoachDisplayName").value;
             data.participants = []; 
         }
         await addDoc(reservationsCol, data);
@@ -167,37 +161,23 @@ async function confirmBooking() {
     document.getElementById("successPin").innerText = pin; document.getElementById("successModal").classList.add("active");
 }
 
-// KLUCZOWA FUNKCJA: ODŚWIEŻANIE TREŚCI MODALA
-function refreshModalUI(res) {
+function openJoinWorkshop(res) {
     activeWorkshop = res;
     const taken = res.participants ? res.participants.length : 0;
     const savedPin = localStorage.getItem('userPin');
-
-    document.getElementById("coachDashboardBtn").innerText = `Trener ${res.coachName || "..."}`;
+    document.getElementById("coachDashboardBtn").innerText = `Trener ${res.coachName}`;
     document.getElementById("workshopDescriptionText").innerText = res.address;
-    document.getElementById("donationValue").innerText = `${res.donation || 0} zł`;
-    document.getElementById("blikValue").innerText = res.blik || "---";
+    document.getElementById("donationValue").innerText = `${res.donation} zł`;
+    document.getElementById("blikValue").innerText = res.blik;
     document.getElementById("spotsLeftCount").innerText = res.maxSpots - taken;
-
-    // AKTUALIZACJA NOTATKI (TUTAJ BYŁ PROBLEM)
     const noteBox = document.getElementById("coachNoteBox");
-    if (res.coachNote && res.coachNote.trim() !== "") {
-        noteBox.style.display = "block";
-        document.getElementById("coachNoteText").innerText = res.coachNote;
-    } else {
-        noteBox.style.display = "none";
-    }
-
+    if (res.coachNote) { noteBox.style.display = "block"; document.getElementById("coachNoteText").innerText = res.coachNote; }
+    else noteBox.style.display = "none";
     const listDiv = document.getElementById("participantsList");
     listDiv.innerHTML = (res.participants && res.participants.length > 0) 
-        ? res.participants.map((p, i) => `<div class="participant-item"><div><strong>${p.name}</strong> (${p.age} l.), dom: ${p.address}</div><button class="leave-btn" onclick="removeParticipant(${i})">Wypisz</button></div>`).join("")
-        : "<em style='color: #94a3b8;'>Brak zapisów.</em>";
-
+        ? res.participants.map((p, i) => `<div class="participant-item"><div><strong>${p.name}</strong> (${p.age} l.)</div><button class="leave-btn" onclick="removeParticipant(${i})">Wypisz</button></div>`).join("")
+        : "Brak zapisów.";
     document.getElementById("joinForm").style.display = (savedPin === res.pin || savedPin === "9988") ? "none" : "block";
-}
-
-function openJoinWorkshop(res) {
-    refreshModalUI(res);
     document.getElementById("joinWorkshopModal").classList.add("active");
 }
 
@@ -205,30 +185,65 @@ window.removeParticipant = async (index) => {
     const p = activeWorkshop.participants[index];
     const inputPin = prompt(`Podaj PIN dziecka: ${p.name}`);
     if (inputPin === p.pin || inputPin === activeWorkshop.pin || inputPin === "9988") {
-        if (!confirm("Wypisać dziecko?")) return;
         await updateDoc(doc(db, "reservations", activeWorkshop.id), { participants: arrayRemove(p) });
-        alert("Wypisano.");
+        alert("Wypisano."); document.getElementById("joinWorkshopModal").classList.remove("active");
     } else if (inputPin !== null) alert("Błędny PIN!");
 };
 
 document.getElementById("confirmJoinBtn").onclick = async () => {
     const name = document.getElementById("joinName").value.trim();
-    const age = document.getElementById("joinAge").value.trim();
-    const addr = document.getElementById("joinAddress").value.trim();
     const pin = document.getElementById("joinPin").value.trim();
-    if (!name || !age || !addr || pin.length < 4) return alert("Podaj dane i 4-cyfrowy PIN!");
-    if (activeWorkshop.participants && activeWorkshop.participants.length >= activeWorkshop.maxSpots) return alert("Brak miejsc!");
+    if (!name || pin.length < 4) return alert("Podaj dane!");
     await updateDoc(doc(db, "reservations", activeWorkshop.id), { 
-        participants: arrayUnion({ name, age, address: addr, pin, joinedAt: new Date().toISOString() }) 
+        participants: arrayUnion({ name, age: document.getElementById("joinAge").value, address: document.getElementById("joinAddress").value, pin, joinedAt: new Date().toISOString() }) 
     });
     generateCalendarLinks([{ date: activeWorkshop.date, time: activeWorkshop.time }]);
     localStorage.setItem('userPin', pin);
     document.getElementById("joinWorkshopModal").classList.remove("active");
-    document.getElementById("successPin").innerText = pin;
-    document.getElementById("successModal").classList.add("active");
+    document.getElementById("successPin").innerText = pin; document.getElementById("successModal").classList.add("active");
 };
 
-// PANEL TRENERA
+// GIEŁDA GRACZY (PRZYWRÓCONA LOGIKA)
+document.getElementById("savePostBtn").onclick = async () => {
+    const name = document.getElementById("postName").value.trim();
+    const addr = document.getElementById("postAddress").value.trim();
+    const pin = document.getElementById("postPin").value;
+    if (!name || !addr || pin.length < 4) return alert("Wypełnij wszystkie pola!");
+    await addDoc(partnerBoardCol, {
+        name, address: addr, level: document.getElementById("postLevel").value,
+        contact: document.getElementById("postContact").value, pin, createdAt: new Date().toISOString()
+    });
+    document.getElementById("postModal").classList.remove("active");
+};
+
+window.deletePost = async (id, postPin) => {
+    const input = prompt("Podaj PIN ogłoszenia:");
+    if (input === postPin || input === "9988") {
+        await deleteDoc(doc(db, "partner_board", id));
+        alert("Ogłoszenie usunięte.");
+    } else if (input !== null) alert("Błędny PIN!");
+};
+
+onSnapshot(partnerBoardCol, (snap) => {
+    const list = document.getElementById("postsList");
+    if (!list) return;
+    list.innerHTML = "";
+    snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).forEach(post => {
+        const card = document.createElement("div");
+        card.className = "post-card";
+        const lvlClass = post.level === "Zaawansowany" ? "lvl-pro" : (post.level === "Początkujący" ? "lvl-beg" : "lvl-mid");
+        card.innerHTML = `
+            <div class="post-level ${lvlClass}">${post.level}</div>
+            <button class="leave-btn" style="position:absolute; top:15px; right:15px;" onclick="deletePost('${post.id}','${post.pin}')">Usuń</button>
+            <h3 style="margin: 0 0 5px 0;">${post.name}</h3>
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">Dom: ${post.address}</div>
+            <div style="background: #fff; padding: 10px; border-radius: 10px; font-weight: 700; color: #1a2a47; border: 1px solid #edf2f7;">📞 ${post.contact}</div>
+        `;
+        list.appendChild(card);
+    });
+});
+
+// PANEL TRENERA I RESZTA
 document.getElementById("coachDashboardBtn").onclick = () => {
     const savedPin = localStorage.getItem('userPin');
     if (savedPin === activeWorkshop.pin || savedPin === "9988") openCoachDashboard();
@@ -244,52 +259,54 @@ function openCoachDashboard() {
 }
 
 document.getElementById("saveNoteBtn").onclick = async () => {
-    const newNote = document.getElementById("editCoachNote").value.trim();
-    await updateDoc(doc(db, "reservations", activeWorkshop.id), { coachNote: newNote });
-    alert("Zaktualizowano komentarz!");
-    document.getElementById("coachDashboardModal").classList.remove("active");
+    await updateDoc(doc(db, "reservations", activeWorkshop.id), { coachNote: document.getElementById("editCoachNote").value.trim() });
+    alert("Zaktualizowano!"); document.getElementById("coachDashboardModal").classList.remove("active");
 };
 
 document.getElementById("coachCancelFullBtn").onclick = () => {
-    if (confirm("NA PEWNO odwołać całe szkolenie i usunąć wszystkich zapisanych?")) {
-        document.getElementById("coachDashboardModal").classList.remove("active");
-        document.getElementById("joinWorkshopModal").classList.remove("active");
+    if (confirm("Odwołać zajęcia?")) {
         cancelReservation(activeWorkshop, activeWorkshop.date, activeWorkshop.time);
+        document.querySelectorAll(".modal").forEach(m => m.classList.remove("active"));
     }
 };
 
 async function cancelReservation(res, date, time) {
-    const block = findConnectedBlock(time, date, res.firstName, allReservations);
-    for (let item of block) await deleteDoc(doc(db, "reservations", item.id));
+    const savedPin = localStorage.getItem('userPin');
+    let shouldDelete = false;
+    if (savedPin === res.pin || savedPin === "9988") shouldDelete = true;
+    else { const pin = prompt("Podaj PIN:"); if (pin === res.pin || pin === "9988") shouldDelete = true; }
+    if (shouldDelete) {
+        const block = findConnectedBlock(time, date, res.firstName, allReservations);
+        for (let item of block) await deleteDoc(doc(db, "reservations", item.id));
+    }
 }
 
-// NASŁUCHIWANIE BAZY (DYNAMICZNE ODŚWIEŻANIE)
+// INIT
 onSnapshot(reservationsCol, (snap) => {
     allReservations = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCalendar();
-    
-    // Jeśli okno szczegółów jest otwarte, odświeżamy jego treść na żywo
     if (activeWorkshop) {
-        const updatedRes = allReservations.find(r => r.id === activeWorkshop.id);
-        if (updatedRes) {
-            refreshModalUI(updatedRes);
-        } else {
-            // Jeśli szkolenie zostało usunięte w tle
-            document.getElementById("joinWorkshopModal").classList.remove("active");
-            activeWorkshop = null;
-        }
+        const updated = allReservations.find(r => r.id === activeWorkshop.id);
+        if (updated) refreshModalUI(updated);
     }
 });
 
-document.getElementById("confirmBookingBtn").onclick = confirmBooking;
-document.getElementById("reserveBtn").onclick = () => document.getElementById("bookingModal").classList.add("active");
-document.querySelectorAll(".cancel-modal-btn, .close-x").forEach(btn => {
-    btn.onclick = () => document.querySelectorAll(".modal").forEach(m => m.classList.remove("active"));
-});
-document.getElementById("cancelJoinBtn").onclick = () => { document.getElementById("joinWorkshopModal").classList.remove("active"); activeWorkshop = null; };
-document.getElementById("closeCoachDashBtn").onclick = () => document.getElementById("coachDashboardModal").classList.remove("active");
-document.getElementById("closeSuccessBtn").onclick = () => document.getElementById("successModal").classList.remove("active");
+function refreshModalUI(res) {
+    activeWorkshop = res;
+    const taken = res.participants ? res.participants.length : 0;
+    document.getElementById("spotsLeftCount").innerText = res.maxSpots - taken;
+    document.getElementById("coachNoteText").innerText = res.coachNote || "";
+    document.getElementById("coachNoteBox").style.display = res.coachNote ? "block" : "none";
+    document.getElementById("participantsList").innerHTML = (res.participants && res.participants.length > 0) 
+        ? res.participants.map((p, i) => `<div class="participant-item"><div><strong>${p.name}</strong></div><button class="leave-btn" onclick="removeParticipant(${i})">Wypisz</button></div>`).join("")
+        : "Brak zapisów.";
+}
+
 document.getElementById("openBoardBtn").onclick = () => document.getElementById("partnerBoard").style.display = "block";
 document.getElementById("closeBoardBtn").onclick = () => document.getElementById("partnerBoard").style.display = "none";
+document.getElementById("addPostBtn").onclick = () => document.getElementById("postModal").classList.add("active");
+document.getElementById("confirmBookingBtn").onclick = confirmBooking;
+document.getElementById("reserveBtn").onclick = () => document.getElementById("bookingModal").classList.add("active");
+document.querySelectorAll(".close-x, .cancel-modal-btn").forEach(b => b.onclick = () => document.querySelectorAll(".modal, .board-overlay").forEach(m => {m.classList.remove("active"); m.style.display="none";}));
 
 renderCalendar();

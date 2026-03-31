@@ -14,7 +14,7 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); colo
 
 .container { width: 100%; max-width: 1400px; margin: 0 auto; }
 
-/* PRZYCISKI */
+/* PRZYCISKI GŁÓWNE */
 .partner-btn { background: #1a2a47; color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 700; cursor: pointer; }
 .primary-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 320px; padding: 18px; background: #1a2a47; color: #fff; border: none; border-radius: 40px; font-weight: 700; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
@@ -30,48 +30,38 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); colo
 .time-slot.booked { background-color: #fff5f5; color: #9b2c2c; border-left: 4px solid #fc8181; padding: 6px 12px; height: auto; align-items: flex-start; justify-content: flex-start; }
 .time-slot.workshop { background-color: var(--workshop-bg); color: #1e3a8a; border-left: 4px solid var(--workshop-border); padding: 6px 12px; height: auto; align-items: flex-start; justify-content: flex-start; }
 
-.res-content { display: flex; flex-direction: column; width: 100%; }
-.res-time { font-weight: 800; font-size: 0.85rem; }
-.res-user { font-size: 0.8rem; font-weight: 600; line-height: 1.2; margin-top: 2px; }
-.spots-left { font-size: 0.75rem; font-weight: 800; color: #3b82f6; margin-top: 4px; background: #fff; padding: 2px 6px; border-radius: 4px; display: inline-block; border: 1px solid #3b82f633; }
+/* GIEŁDA GRACZY (PRZYWRÓCONE) */
+.board-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 3000; overflow-y: auto; padding: 20px; }
+.board-content { background: #fff; padding: 35px; border-radius: var(--radius); max-width: 600px; margin: 20px auto; position: relative; }
+.add-post-btn { width: 100%; padding: 16px; background: #bef227; border: none; border-radius: 14px; font-weight: 800; margin-bottom: 20px; cursor: pointer; }
 
-.is-continuation { min-height: 15px; height: 15px; padding: 0 !important; border-bottom: none; }
-.is-continuation * { display: none; }
+.posts-container { display: grid; gap: 15px; }
+.post-card { background: #f8fafc; padding: 20px; border-radius: 18px; border: 1px solid #e2e8f0; position: relative; }
+.post-level { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; }
+.lvl-pro { background: #fee2e2; color: #ef4444; }
+.lvl-mid { background: #fef9c3; color: #856404; }
+.lvl-beg { background: #f0fdf4; color: #166534; }
 
-/* MODALE - KLUCZOWE POZYCJONOWANIE */
+/* MODALE I KRZYŻYK */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 5000; padding: 20px; }
 .modal.active { display: flex; }
+.modal-content { background: #fff; padding: 35px; border-radius: var(--radius); width: 100%; max-width: 440px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.25); }
 
-.modal-content { 
-    background: #fff; padding: 35px; border-radius: var(--radius); 
-    width: 100%; max-width: 440px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); 
-    position: relative; /* Pozwala na pozycjonowanie krzyżyka */
-}
-
-.close-x {
-    position: absolute; top: 20px; right: 20px;
-    background: none; border: none; cursor: pointer;
-    font-size: 2.2rem; color: #94a3b8; line-height: 1;
-    z-index: 100; padding: 5px; transition: 0.2s;
-}
+.close-x { position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; font-size: 2.2rem; color: #94a3b8; line-height: 1; z-index: 100; transition: 0.2s; }
 .close-x:hover { color: #ef4444; transform: scale(1.1); }
 
-/* RAMKI INFO */
-.coach-link-btn { background: transparent; border: none; color: #3b82f6; font-size: 0.85rem; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0; }
 .info-box-blue { background: #f0f7ff; padding: 12px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #3b82f6; }
 .info-box-green { background: #f0fdf4; padding: 12px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #22c55e; color: #166534; }
 .info-box-yellow { background: #fffde7; padding: 12px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #fbc02d; }
 
-.p-list-container { max-height: 150px; overflow-y: auto; background: #f8fafc; border-radius: 12px; padding: 10px; font-size: 0.85rem; }
-.participant-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #edf2f7; }
-.leave-btn { background: #f1f5f9; color: #64748b; border: none; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; }
-.leave-btn:hover { background: #fee2e2; color: #ef4444; }
+.p-list-container { max-height: 150px; overflow-y: auto; background: #f8fafc; border-radius: 12px; padding: 10px; }
+.participant-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #edf2f7; }
 
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 0.85rem; }
-.form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; }
+.form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; }
 
 .confirm-btn { padding: 16px; background: #1a2a47; color: white; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; }
 .secondary-btn { padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
 
-@media (max-width: 600px) { .calendar-grid { padding: 10px; } .day-column { flex: 0 0 160px; } }
+@media (max-width: 600px) { .day-column { flex: 0 0 160px; } .calendar-grid { padding: 10px; } }
